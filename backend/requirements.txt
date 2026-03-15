@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+google-adk
+google-genai
+google-cloud-firestore
+google-cloud-storage
+pydub
+pydantic
+sse-starlette
+python-dotenv
+pytest
+httpx
