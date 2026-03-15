@@ -1,10 +1,14 @@
 import asyncio
 import json
 import base64
+import logging
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 from google import genai
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 from config import GOOGLE_API_KEY, STORYTELLER_MODEL
 from agents.storyteller import STORYTELLER_INSTRUCTION
@@ -84,8 +88,20 @@ async def create_journey_stream(request: Request):
                             }
                         })
 
+            # Log what we got from Gemini
+            logger.info(f"Got {len(response_parts)} parts from Gemini")
+            for i, p in enumerate(response_parts):
+                if "text" in p:
+                    logger.info(f"Part {i}: TEXT ({len(p['text'])} chars): {p['text'][:200]}...")
+                elif "inline_data" in p:
+                    logger.info(f"Part {i}: IMAGE ({p['inline_data']['mime_type']}, {len(p['inline_data'].get('data',''))} bytes)")
+
             # Parse the interleaved response
             parsed_stops = parse_interleaved_response(response_parts)
+
+            logger.info(f"Parsed {len(parsed_stops)} stops")
+            for s in parsed_stops:
+                logger.info(f"  Stop {s.stop_number}: title='{s.title}', narrative={len(s.narrative)} chars, scene={bool(s.scene_image_data)}, dish={bool(s.dish_image_data)}, recipe={bool(s.recipe)}, place={bool(s.place)}")
 
             if not parsed_stops:
                 yield {
