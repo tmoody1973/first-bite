@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { RecipeCard } from "./RecipeCard";
 import { PlaceCard } from "./PlaceCard";
@@ -21,57 +22,135 @@ interface StopCardProps {
 
 export function StopCard({ stop, journeyId }: StopCardProps) {
   const theme = STOP_THEMES[stop.stopNumber - 1] || "";
+  const [showRecipe, setShowRecipe] = useState(false);
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6 }}
-      className="max-w-3xl mx-auto px-6 py-16"
-    >
-      <div className="mb-8">
-        <p className="font-sans text-xs uppercase tracking-[0.2em] text-[#C4652A] mb-2">
-          Stop {stop.stopNumber} &mdash; {theme}
-        </p>
-        <h2 className="font-serif text-3xl md:text-4xl font-bold">
-          {stop.title}
-        </h2>
-      </div>
-
-      <div className="font-sans text-base md:text-lg leading-relaxed text-[#E8E0D0]/80 whitespace-pre-line mb-8">
-        {stop.narrative}
-      </div>
-
+    <div className="relative h-screen w-screen overflow-y-auto">
+      {/* Background scene image */}
       {stop.sceneImageUrl && (
-        <motion.img
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          src={stop.sceneImageUrl}
-          alt={`Scene at ${stop.title}`}
-          className="w-full rounded-xl mb-8 shadow-2xl"
-        />
-      )}
-
-      {stop.recipe && (
-        <div className="mb-8">
-          <RecipeCard recipe={stop.recipe} dishImageUrl={stop.dishImageUrl} />
+        <div className="absolute inset-0">
+          <img
+            src={stop.sceneImageUrl}
+            alt={`Scene at ${stop.title}`}
+            className="w-full h-full object-cover"
+          />
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-[#0A0A0A]/30" />
         </div>
       )}
 
-      {stop.place && (
-        <div className="mb-8">
-          <PlaceCard place={stop.place} />
-        </div>
+      {/* No image fallback — solid dark background */}
+      {!stop.sceneImageUrl && (
+        <div className="absolute inset-0 bg-[#0A0A0A]" />
       )}
 
-      <AudioPlayer
-        stopNumber={stop.stopNumber}
-        narrative={stop.narrative}
-        journeyId={journeyId}
-        ttsAudioUrl={stop.ttsAudioUrl}
-      />
-    </motion.section>
+      {/* Content overlay */}
+      <div className="relative z-10 flex flex-col justify-end min-h-screen px-6 pb-8 pt-20 max-w-2xl mx-auto">
+        {/* Stop label */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <p className="font-sans text-xs uppercase tracking-[0.25em] text-[#C4652A] mb-2">
+            Stop {stop.stopNumber} &mdash; {theme}
+          </p>
+        </motion.div>
+
+        {/* Title */}
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-6"
+        >
+          {stop.title}
+        </motion.h2>
+
+        {/* Narrative */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="font-sans text-sm md:text-base leading-relaxed text-[#E8E0D0]/80 mb-6 max-h-[35vh] overflow-y-auto pr-2 whitespace-pre-line scrollbar-thin"
+        >
+          {stop.narrative}
+        </motion.div>
+
+        {/* Action row: dish image, recipe, place, audio */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-4"
+        >
+          {/* Dish image thumbnail + recipe toggle */}
+          {(stop.dishImageUrl || stop.recipe) && (
+            <div className="flex items-center gap-4">
+              {stop.dishImageUrl && (
+                <img
+                  src={stop.dishImageUrl}
+                  alt={stop.recipe?.dish_name || "Dish"}
+                  className="w-16 h-16 rounded-xl object-cover border border-white/10 cursor-pointer hover:scale-105 transition-transform"
+                  onClick={() => setShowRecipe(!showRecipe)}
+                />
+              )}
+              <div className="flex-1">
+                {stop.recipe && (
+                  <button
+                    onClick={() => setShowRecipe(!showRecipe)}
+                    className="font-serif text-lg font-bold hover:text-[#C4652A] transition-colors text-left"
+                  >
+                    {stop.recipe.dish_name}
+                  </button>
+                )}
+                {stop.recipe && (
+                  <p className="font-sans text-xs text-[#E8E0D0]/40">
+                    {stop.recipe.cuisine_type} &middot; {stop.recipe.prep_time} min &middot; Tap for recipe
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Place info */}
+          {stop.place && <PlaceCard place={stop.place} />}
+
+          {/* Audio player */}
+          <AudioPlayer
+            stopNumber={stop.stopNumber}
+            narrative={stop.narrative}
+            journeyId={journeyId}
+            ttsAudioUrl={stop.ttsAudioUrl}
+          />
+        </motion.div>
+      </div>
+
+      {/* Recipe modal (slides up from bottom) */}
+      {showRecipe && stop.recipe && (
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed inset-0 z-[80] flex items-end"
+          onClick={() => setShowRecipe(false)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-h-[85vh] overflow-y-auto rounded-t-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div className="sticky top-0 bg-[#0A0A0A] pt-3 pb-2 flex justify-center rounded-t-3xl z-10">
+              <div className="w-10 h-1 rounded-full bg-white/20" />
+            </div>
+            <div className="px-4 pb-8 bg-[#0A0A0A]">
+              <RecipeCard recipe={stop.recipe} dishImageUrl={stop.dishImageUrl} />
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </div>
   );
 }
