@@ -14,6 +14,7 @@ from config import GOOGLE_API_KEY, STORYTELLER_MODEL
 from services.parser import parse_interleaved_response, ParsedStop
 from services.storage import upload_image_from_base64
 from services.firestore import create_journey, update_journey_stops, get_journey, update_journey_status
+from tools.tts import generate_tts
 
 router = APIRouter()
 
@@ -143,6 +144,17 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
     if stop.dish_image_data:
         dish_url = upload_image_from_base64(stop.dish_image_data, prefix="dishes")
 
+    # Generate TTS narration automatically (like Sonic Sommelier)
+    tts_url = None
+    if stop.narrative:
+        try:
+            # Trim narrative for TTS — first 500 chars to keep audio short
+            tts_text = stop.narrative[:500]
+            tts_url = generate_tts(tts_text, voice="Charon")
+            logger.info(f"Stop {stop_num}: TTS generated")
+        except Exception as e:
+            logger.warning(f"Stop {stop_num}: TTS failed: {e}")
+
     return {
         "stop_number": stop.stop_number,
         "title": stop.title,
@@ -151,7 +163,7 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
         "dish_image_url": dish_url,
         "recipe": stop.recipe.model_dump() if stop.recipe else None,
         "place": stop.place.model_dump() if stop.place else None,
-        "tts_audio_url": None,
+        "tts_audio_url": tts_url,
     }
 
 
