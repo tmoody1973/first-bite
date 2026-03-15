@@ -15,7 +15,7 @@ def create_journey(prompt: str, mode: str = "journey") -> str:
     doc_ref.set({
         "prompt": prompt,
         "mode": mode,
-        "status": "streaming",
+        "status": "generating",
         "created_at": datetime.now(),
         "stops": [],
     })
@@ -23,10 +23,17 @@ def create_journey(prompt: str, mode: str = "journey") -> str:
 
 
 def update_journey_stops(journey_id: str, stops: list[dict]) -> None:
-    """Update the stops array for a journey."""
+    """Update the stops array for a journey (progressive — called after each stop)."""
     db = _get_db()
     doc_ref = db.collection("journeys").document(journey_id)
-    doc_ref.update({"stops": stops, "status": "ready"})
+    doc_ref.update({"stops": stops})
+
+
+def update_journey_status(journey_id: str, status: str) -> None:
+    """Update just the status field."""
+    db = _get_db()
+    doc_ref = db.collection("journeys").document(journey_id)
+    doc_ref.update({"status": status})
 
 
 def get_journey(journey_id: str) -> dict | None:
