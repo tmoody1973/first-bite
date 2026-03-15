@@ -11,9 +11,9 @@ app = FastAPI(title="First Bite API", version="0.1.0")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # In-memory rate limiter (resets on instance recycle — fine for hackathon)
