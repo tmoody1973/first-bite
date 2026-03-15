@@ -1,14 +1,13 @@
 import asyncio
 import json
+import base64
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 from google import genai
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 
-from config import GOOGLE_API_KEY
-from agents.orchestrator import orchestrator
+from config import GOOGLE_API_KEY, STORYTELLER_MODEL
+from agents.storyteller import STORYTELLER_INSTRUCTION
 from services.parser import parse_interleaved_response
 from services.storage import upload_image_from_base64
 from services.firestore import create_journey, update_journey_stops, get_journey
@@ -36,53 +35,54 @@ async def create_journey_stream(request: Request):
     journey_id = create_journey(prompt)
 
     async def event_generator():
-        # Send loading quips while we wait
-        for quip in LOADING_QUIPS[:2]:
+        # Send loading quips
+        for quip in LOADING_QUIPS[:3]:
             yield {"event": "status", "data": json.dumps({"message": quip})}
-            await asyncio.sleep(1)
+            await asyncio.sleep(1.5)
 
         try:
-            # Run the ADK pipeline
+            # Call Gemini directly with interleaved output
+            # ADK doesn't properly pass responseModalities for image generation,
+            # so we use the GenAI SDK directly for the storyteller
             client = genai.Client(api_key=GOOGLE_API_KEY)
-            session_service = InMemorySessionService()
-            runner = Runner(
-                agent=orchestrator,
-                app_name="first_bite",
-                session_service=session_service,
-            )
 
-            session = await session_service.create_session(
-                app_name="first_bite",
-                user_id="anonymous",
-            )
-
-            # Send more quips
             yield {
                 "event": "status",
-                "data": json.dumps({"message": LOADING_QUIPS[2]}),
+                "data": json.dumps({"message": LOADING_QUIPS[3]}),
             }
 
-            # Execute the agent
+            response = client.models.generate_content(
+                model=STORYTELLER_MODEL,
+                contents=[
+                    {"role": "user", "parts": [{"text": f"{STORYTELLER_INSTRUCTION}\n\nUser request: {prompt}"}]}
+                ],
+                config={
+                    "response_modalities": ["TEXT", "IMAGE"],
+                },
+            )
+
+            yield {
+                "event": "status",
+                "data": json.dumps({"message": LOADING_QUIPS[4]}),
+            }
+
+            # Extract parts from response
             response_parts = []
-            async for event in runner.run_async(
-                user_id="anonymous",
-                session_id=session.id,
-                new_message=genai.types.Content(
-                    role="user",
-                    parts=[genai.types.Part(text=prompt)],
-                ),
-            ):
-                if event.content and event.content.parts:
-                    for part in event.content.parts:
-                        if hasattr(part, "text") and part.text:
-                            response_parts.append({"text": part.text})
-                        elif hasattr(part, "inline_data") and part.inline_data:
-                            response_parts.append({
-                                "inline_data": {
-                                    "mime_type": part.inline_data.mime_type,
-                                    "data": part.inline_data.data,
-                                }
-                            })
+            if response.candidates and response.candidates[0].content:
+                for part in response.candidates[0].content.parts:
+                    if hasattr(part, "text") and part.text:
+                        response_parts.append({"text": part.text})
+                    elif hasattr(part, "inline_data") and part.inline_data:
+                        # inline_data.data may be bytes or base64 string
+                        data = part.inline_data.data
+                        if isinstance(data, bytes):
+                            data = base64.b64encode(data).decode("utf-8")
+                        response_parts.append({
+                            "inline_data": {
+                                "mime_type": part.inline_data.mime_type,
+                                "data": data,
+                            }
+                        })
 
             # Parse the interleaved response
             parsed_stops = parse_interleaved_response(response_parts)
@@ -186,7 +186,7 @@ async def create_journey_stream(request: Request):
             yield {
                 "event": "journey-error",
                 "data": json.dumps({
-                    "message": "The kitchen's closed. Try another destination.",
+                    "message": f"The kitchen's closed. ({type(e).__name__}: {str(e)[:100]})",
                     "retryable": True,
                 }),
             }

@@ -1,4 +1,5 @@
 import os
+import base64
 import subprocess
 import tempfile
 from google import genai
@@ -26,33 +27,69 @@ def generate_tts(text: str, voice: str = "Charon") -> str:
 
     for part in response.candidates[0].content.parts:
         if hasattr(part, "inline_data") and part.inline_data:
-            wav_bytes = part.inline_data.data
-            mp3_bytes = _transcode_to_mp3(wav_bytes)
+            audio_data = part.inline_data.data
+            mime_type = part.inline_data.mime_type or "audio/wav"
+
+            # Data may be bytes or base64 string
+            if isinstance(audio_data, str):
+                audio_bytes = base64.b64decode(audio_data)
+            else:
+                audio_bytes = audio_data
+
+            # Try to return as-is if it's already a usable format
+            # Otherwise transcode with ffmpeg
+            mp3_bytes = _transcode_to_mp3(audio_bytes, mime_type)
             url = upload_audio(mp3_bytes, prefix="tts")
             return url
 
     return ""
 
 
-def _transcode_to_mp3(wav_bytes: bytes) -> bytes:
-    """Transcode WAV/PCM bytes to MP3 using ffmpeg."""
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as wav_file:
-        wav_file.write(wav_bytes)
-        wav_path = wav_file.name
+def _transcode_to_mp3(audio_bytes: bytes, mime_type: str) -> bytes:
+    """Transcode audio bytes to MP3 using ffmpeg."""
+    # Determine input format from mime type
+    if "pcm" in mime_type or "raw" in mime_type or "L16" in mime_type:
+        # Raw PCM: need to specify format, sample rate, channels
+        input_args = ["-f", "s16le", "-ar", "24000", "-ac", "1"]
+        suffix = ".pcm"
+    elif "wav" in mime_type:
+        input_args = []
+        suffix = ".wav"
+    else:
+        # Try auto-detect
+        input_args = []
+        suffix = ".wav"
 
-    mp3_path = wav_path.replace(".wav", ".mp3")
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as in_file:
+        in_file.write(audio_bytes)
+        in_path = in_file.name
+
+    mp3_path = in_path + ".mp3"
 
     try:
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", wav_path, "-codec:a", "libmp3lame",
-             "-qscale:a", "2", mp3_path],
-            capture_output=True,
-            check=True,
-        )
+        cmd = ["ffmpeg", "-y"] + input_args + [
+            "-i", in_path,
+            "-codec:a", "libmp3lame",
+            "-qscale:a", "2",
+            mp3_path,
+        ]
+        result = subprocess.run(cmd, capture_output=True, timeout=30)
+
+        if result.returncode != 0:
+            # If ffmpeg fails, try raw PCM with different params
+            cmd2 = [
+                "ffmpeg", "-y",
+                "-f", "s16le", "-ar", "24000", "-ac", "1",
+                "-i", in_path,
+                "-codec:a", "libmp3lame",
+                "-qscale:a", "2",
+                mp3_path,
+            ]
+            subprocess.run(cmd2, capture_output=True, check=True, timeout=30)
 
         with open(mp3_path, "rb") as f:
             return f.read()
     finally:
-        os.unlink(wav_path)
+        os.unlink(in_path)
         if os.path.exists(mp3_path):
             os.unlink(mp3_path)
