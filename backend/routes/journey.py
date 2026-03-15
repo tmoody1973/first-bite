@@ -148,8 +148,7 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
     tts_url = None
     if stop.narrative:
         try:
-            # Trim narrative for TTS — first 500 chars to keep audio short
-            tts_text = stop.narrative[:500]
+            tts_text = stop.narrative
             tts_url = generate_tts(tts_text, voice="Charon")
             logger.info(f"Stop {stop_num}: TTS generated")
         except Exception as e:
