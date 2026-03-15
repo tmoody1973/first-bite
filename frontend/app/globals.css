@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+:root {
+  --background: #0A0A0A;
+  --foreground: #E8E0D0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+body {
+  background-color: #0A0A0A;
+  color: #E8E0D0;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* Subtle grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('/grain.png');
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 100;
+}
