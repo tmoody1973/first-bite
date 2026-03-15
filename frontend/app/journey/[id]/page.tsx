@@ -36,7 +36,7 @@ export default function JourneyPage() {
   }, [journeyId]);
 
   if (loading) {
-    return <LoadingQuips message="Loading your journey..." />;
+    return <LoadingQuips stopsGenerated={0} />;
   }
 
   if (error) {

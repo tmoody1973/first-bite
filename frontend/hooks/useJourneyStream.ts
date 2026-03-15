@@ -25,16 +25,7 @@ export interface StopData {
   ttsAudioUrl: string | null;
 }
 
-type StreamStatus = "idle" | "loading" | "streaming" | "complete" | "error";
-
-const STATUS_MESSAGES = [
-  "Finding the places the guidebooks forgot...",
-  "Walking the streets, following the smoke...",
-  "Sketching the scene...",
-  "Plating the dish...",
-  "Writing the recipe...",
-  "Assembling your journey...",
-];
+type StreamStatus = "idle" | "loading" | "complete" | "error";
 
 function mapStop(s: Record<string, unknown>): StopData {
   return {
@@ -52,11 +43,10 @@ function mapStop(s: Record<string, unknown>): StopData {
 export function useJourneyStream() {
   const [stops, setStops] = useState<StopData[]>([]);
   const [status, setStatus] = useState<StreamStatus>("idle");
-  const [statusMessage, setStatusMessage] = useState("");
+  const [stopsGenerated, setStopsGenerated] = useState(0);
   const [journeyId, setJourneyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const messageIndexRef = useRef(0);
 
   // Clean up polling on unmount
   useEffect(() => {
@@ -70,11 +60,10 @@ export function useJourneyStream() {
     setStatus("loading");
     setError(null);
     setJourneyId(null);
-    messageIndexRef.current = 0;
-    setStatusMessage(STATUS_MESSAGES[0]);
+    setStopsGenerated(0);
 
     try {
-      // Step 1: Create the journey (backend generates in background)
+      // Create the journey — backend generates in background
       const res = await fetch(`${API_URL}/api/journey`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,7 +79,7 @@ export function useJourneyStream() {
       const { journeyId: jid } = await res.json();
       setJourneyId(jid);
 
-      // Step 2: Poll for progress (like Convex subscriptions but simpler)
+      // Poll until ALL stops are ready (like Sonic Sommelier waiting for full pipeline)
       pollingRef.current = setInterval(async () => {
         try {
           const pollRes = await fetch(`${API_URL}/api/journey/${jid}`);
@@ -99,17 +88,10 @@ export function useJourneyStream() {
           const journey = await pollRes.json();
           const journeyStops = (journey.stops || []) as Record<string, unknown>[];
 
-          if (journeyStops.length > 0) {
-            setStatus("streaming");
-            setStops(journeyStops.map(mapStop));
-          }
+          // Update progress counter (for loading screen)
+          setStopsGenerated(journeyStops.length);
 
-          // Cycle through status messages
-          messageIndexRef.current =
-            (messageIndexRef.current + 1) % STATUS_MESSAGES.length;
-          setStatusMessage(STATUS_MESSAGES[messageIndexRef.current]);
-
-          // Check if complete
+          // Only reveal when EVERYTHING is done
           if (journey.status === "ready") {
             if (pollingRef.current) clearInterval(pollingRef.current);
             pollingRef.current = null;
@@ -124,12 +106,12 @@ export function useJourneyStream() {
         } catch {
           // Ignore individual poll failures
         }
-      }, 3000); // Poll every 3 seconds
+      }, 3000);
     } catch {
       setStatus("error");
       setError("Connection lost. Please try again.");
     }
   }, []);
 
-  return { stops, status, statusMessage, journeyId, error, startJourney };
+  return { stops, status, stopsGenerated, journeyId, error, startJourney };
 }

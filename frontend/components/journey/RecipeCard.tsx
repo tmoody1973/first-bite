@@ -59,10 +59,11 @@ export function RecipeCard({ recipe, dishImageUrl }: RecipeCardProps) {
           <h5 className="font-sans text-xs uppercase tracking-wider text-[#C4652A] mb-2">
             Ingredients
           </h5>
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {recipe.ingredients.map((ing, i) => (
-              <li key={i} className="font-sans text-sm text-[#E8E0D0]/70">
-                {ing.amount}
+              <li key={i} className="font-sans text-sm text-[#E8E0D0]/70 flex justify-between gap-4">
+                <span className="text-[#E8E0D0]/90">{ing.name}</span>
+                <span className="text-[#E8E0D0]/40 text-right shrink-0">{ing.amount}</span>
               </li>
             ))}
           </ul>

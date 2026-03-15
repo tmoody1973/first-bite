@@ -1,34 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LoadingQuipsProps {
-  message: string;
+  stopsGenerated: number;
 }
 
 const PIPELINE_STEPS = [
-  { label: "Reading your request", icon: "01" },
-  { label: "Finding the places the guidebooks forgot", icon: "02" },
-  { label: "Walking the streets, following the smoke", icon: "03" },
-  { label: "Sketching the scene", icon: "04" },
-  { label: "Plating the dish", icon: "05" },
-  { label: "Writing the recipe", icon: "06" },
-  { label: "Assembling your journey", icon: "07" },
+  { label: "The Arrival — first impression, chaos, the smell", theme: "Stop 1" },
+  { label: "The Street — the stall nobody talks about", theme: "Stop 2" },
+  { label: "The Kitchen — behind the counter, the technique", theme: "Stop 3" },
+  { label: "The Table — strangers sharing food and stories", theme: "Stop 4" },
+  { label: "The Last Bite — what this place taught you", theme: "Stop 5" },
 ];
 
-export function LoadingQuips({ message }: LoadingQuipsProps) {
-  const [activeStep, setActiveStep] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep((prev) =>
-        prev < PIPELINE_STEPS.length - 1 ? prev + 1 : prev
-      );
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
+export function LoadingQuips({ stopsGenerated }: LoadingQuipsProps) {
   return (
     <div className="fixed inset-0 bg-[#0A0A0A] flex flex-col items-center justify-center px-6">
       {/* Logo */}
@@ -48,19 +34,19 @@ export function LoadingQuips({ message }: LoadingQuipsProps) {
         Building your journey...
       </motion.p>
 
-      {/* Pipeline steps */}
+      {/* Pipeline steps — real progress from backend */}
       <div className="w-full max-w-sm space-y-3">
         {PIPELINE_STEPS.map((step, i) => {
-          const isActive = i === activeStep;
-          const isComplete = i < activeStep;
-          const isPending = i > activeStep;
+          const isComplete = i < stopsGenerated;
+          const isActive = i === stopsGenerated;
+          const isPending = i > stopsGenerated;
 
           return (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.15 }}
+              transition={{ delay: i * 0.1 }}
               className="flex items-center gap-4"
             >
               {/* Step indicator */}
@@ -73,21 +59,34 @@ export function LoadingQuips({ message }: LoadingQuipsProps) {
                       : "bg-white/5 text-[#E8E0D0]/20"
                 }`}
               >
-                {isComplete ? "✓" : step.icon}
+                {isComplete ? "\u2713" : `0${i + 1}`}
               </div>
 
               {/* Step label */}
-              <p
-                className={`font-sans text-sm transition-all duration-500 ${
-                  isComplete
-                    ? "text-[#E8E0D0]/40"
-                    : isActive
-                      ? "text-[#E8E0D0]"
-                      : "text-[#E8E0D0]/15"
-                }`}
-              >
-                {step.label}
-              </p>
+              <div className="flex-1">
+                <p
+                  className={`font-sans text-xs font-medium transition-all duration-500 ${
+                    isComplete
+                      ? "text-[#E8E0D0]/40"
+                      : isActive
+                        ? "text-[#C4652A]"
+                        : "text-[#E8E0D0]/15"
+                  }`}
+                >
+                  {step.theme}
+                </p>
+                <p
+                  className={`font-serif italic text-xs transition-all duration-500 ${
+                    isComplete
+                      ? "text-[#E8E0D0]/25"
+                      : isActive
+                        ? "text-[#E8E0D0]/60"
+                        : "text-[#E8E0D0]/10"
+                  }`}
+                >
+                  {step.label}
+                </p>
+              </div>
 
               {/* Spinner for active step */}
               {isActive && (
@@ -98,7 +97,7 @@ export function LoadingQuips({ message }: LoadingQuipsProps) {
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="w-4 h-4 border border-[#C4652A]/30 border-t-[#C4652A] rounded-full ml-auto"
+                  className="w-4 h-4 border border-[#C4652A]/30 border-t-[#C4652A] rounded-full"
                 />
               )}
             </motion.div>
@@ -106,19 +105,21 @@ export function LoadingQuips({ message }: LoadingQuipsProps) {
         })}
       </div>
 
-      {/* Live server message */}
+      {/* Bottom message */}
       <AnimatePresence mode="wait">
-        {message && (
-          <motion.p
-            key={message}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="font-serif italic text-xs text-[#C4652A]/60 mt-10 text-center"
-          >
-            &ldquo;{message}&rdquo;
-          </motion.p>
-        )}
+        <motion.p
+          key={stopsGenerated}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="font-serif italic text-xs text-[#E8E0D0]/30 mt-10 text-center"
+        >
+          {stopsGenerated === 0
+            ? "Following the smoke to something worth eating..."
+            : stopsGenerated < 5
+              ? `${stopsGenerated} of 5 stops ready...`
+              : "Assembling your journey..."}
+        </motion.p>
       </AnimatePresence>
     </div>
   );
