@@ -20,6 +20,8 @@ def create_journey(prompt: str, user_id: str = "", mode: str = "journey") -> str
         "created_at": datetime.now(),
         "stops": [],
         "poster_url": "",
+        "lat": None,
+        "lng": None,
     })
     return journey_id
 

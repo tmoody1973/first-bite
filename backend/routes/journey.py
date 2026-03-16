@@ -23,6 +23,7 @@ from tools.image_gen import generate_dish_image
 from tools.places import search_place, get_street_view_url, get_street_view_url_from_address
 from tools.video_gen import generate_journey_video
 from tools.ambient import generate_ambient_sound
+from tools.geocode import geocode_location
 
 router = APIRouter()
 
@@ -282,6 +283,16 @@ def generate_journey_background(journey_id: str, prompt: str):
         client = genai.Client(api_key=GOOGLE_API_KEY)
         stops = []
 
+        # Geocode the prompt location for the dashboard map
+        lat, lng = geocode_location(prompt)
+        if lat and lng:
+            from services.firestore import _get_db
+            db = _get_db()
+            db.collection("journeys").document(journey_id).update({
+                "lat": lat, "lng": lng,
+            })
+            logger.info(f"Journey {journey_id}: geocoded to ({lat}, {lng})")
+
         # PHASE 1: Core experience (~3-4 min)
         for stop_num in range(1, 6):
             logger.info(f"Journey {journey_id}: generating stop {stop_num}...")
@@ -363,28 +374,19 @@ async def get_journey_by_id(journey_id: str):
 async def list_user_journeys(user_id: str):
     """List all completed journeys for a user."""
     journeys = list_journeys_by_user(user_id)
-    result = []
-    for j in journeys:
-        # Extract lat/lng from first stop's place for map pin
-        lat, lng = None, None
-        stops = j.get("stops", [])
-        for s in stops:
-            place = s.get("place")
-            if place and place.get("lat") and place.get("lng"):
-                lat = place["lat"]
-                lng = place["lng"]
-                break
-        result.append({
+    return [
+        {
             "id": j["id"],
             "prompt": j.get("prompt", ""),
             "status": j.get("status", ""),
             "created_at": str(j.get("created_at", "")),
             "poster_url": j.get("poster_url", ""),
-            "stop_count": len(stops),
-            "lat": lat,
-            "lng": lng,
-        })
-    return result
+            "stop_count": len(j.get("stops", [])),
+            "lat": j.get("lat"),
+            "lng": j.get("lng"),
+        }
+        for j in journeys
+    ]
 
 
 @router.get("/api/journey/{journey_id}/share")
