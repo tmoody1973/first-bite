@@ -109,8 +109,8 @@ export function useJourneyStream() {
           const journey = await pollRes.json();
           const journeyStops = (journey.stops || []) as Record<string, unknown>[];
 
-          // As soon as first stop arrives, switch to cinematic mode
-          if (journeyStops.length > 0) {
+          // Wait for 4 stops before revealing (smoother experience)
+          if (journeyStops.length >= 4) {
             setStatus("cinematic");
             setStops(journeyStops.map(mapStop));
           }
