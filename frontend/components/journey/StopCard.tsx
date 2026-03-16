@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { RecipeCard } from "./RecipeCard";
 import { PlaceCard } from "./PlaceCard";
 import { AudioPlayer } from "./AudioPlayer";
+import { PhotoCarousel } from "./PhotoCarousel";
 import type { StopData } from "@/hooks/useJourneyStream";
 
 const STOP_THEMES = [
@@ -101,40 +102,13 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
           {stop.narrative}
         </motion.div>
 
-        {/* Media row: Street View + real photo thumbnails */}
-        {(stop.streetViewUrl || stop.realPhotoUrl) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex gap-2 mb-4"
-          >
-            {stop.streetViewUrl && (
-              <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-white/10">
-                <img
-                  src={stop.streetViewUrl}
-                  alt="Street View"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute bottom-0.5 left-1 font-mono text-[8px] text-white/60 bg-black/50 px-1 rounded">
-                  SV
-                </span>
-              </div>
-            )}
-            {stop.realPhotoUrl && (
-              <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-white/10">
-                <img
-                  src={stop.realPhotoUrl}
-                  alt="Real photo"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute bottom-0.5 left-1 font-mono text-[8px] text-white/60 bg-black/50 px-1 rounded">
-                  Photo
-                </span>
-              </div>
-            )}
-          </motion.div>
-        )}
+        {/* Photo carousel — Street View + real photos */}
+        <PhotoCarousel
+          streetViewUrl={stop.streetViewUrl}
+          realPhotoUrl={stop.realPhotoUrl}
+          dishImageUrl={stop.dishImageUrl}
+          placeName={stop.place?.name}
+        />
 
         {/* Action row */}
         <motion.div

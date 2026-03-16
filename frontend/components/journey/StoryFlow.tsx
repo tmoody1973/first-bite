@@ -73,6 +73,14 @@ export function StoryFlow({
         ))}
       </div>
 
+      {/* Back to gallery button */}
+      <a
+        href="/dashboard"
+        className="fixed top-5 left-4 z-50 font-sans text-[10px] text-[#E8E0D0]/30 uppercase tracking-wider hover:text-[#C4652A] transition-colors"
+      >
+        &larr; Gallery
+      </a>
+
       {/* Generating indicator */}
       {isGenerating && (
         <div className="fixed top-5 left-4 z-50 flex items-center gap-2">
