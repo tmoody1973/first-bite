@@ -35,15 +35,31 @@ export default function DashboardPage() {
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
   const journeysWithCoords = journeys.filter((j) => j.lat && j.lng);
 
-  // Maps Static API with markers — supports pins unlike Embed API
+  // Maps Static API — warm tones that complement the site's palette
+  // Land: warm charcoal (#1E1E1E), Water: deep teal (#0F2B3C), Labels: gold (#D4A843)
+  // Roads: subtle warm (#2A2420), Borders: muted rust (#3D2E24)
+  const mapStyles = [
+    "style=feature:all%7Celement:geometry%7Ccolor:0x1E1E1E",
+    "style=feature:water%7Ccolor:0x0F2B3C",
+    "style=feature:water%7Celement:labels.text.fill%7Ccolor:0x6BA3BE",
+    "style=feature:all%7Celement:labels.text.fill%7Ccolor:0xD4A843",
+    "style=feature:all%7Celement:labels.text.stroke%7Ccolor:0x0A0A0A%7Cweight:3",
+    "style=feature:road%7Celement:geometry%7Ccolor:0x2A2420",
+    "style=feature:administrative.country%7Celement:geometry.stroke%7Ccolor:0x3D2E24",
+    "style=feature:administrative.country%7Celement:labels.text.fill%7Ccolor:0x8B7355",
+    "style=feature:poi%7Cvisibility:off",
+    "style=feature:transit%7Cvisibility:off",
+  ].join("&");
+
   let mapUrl: string | null = null;
   if (mapsKey && journeysWithCoords.length > 0) {
     const markers = journeysWithCoords
       .map((j, i) => `&markers=color:0xC4652A%7Clabel:${i + 1}%7C${j.lat},${j.lng}`)
       .join("");
-    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all%7Celement:geometry%7Ccolor:0x1a1a2e&style=feature:all%7Celement:labels.text.fill%7Ccolor:0xE8E0D0&style=feature:all%7Celement:labels.text.stroke%7Ccolor:0x0A0A0A&style=feature:water%7Ccolor:0x0d1b2a&style=feature:road%7Ccolor:0x2a2a3e&scale=2${markers}&key=${mapsKey}`;
+    // Auto-fit to show all markers, or world view if spread globally
+    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x350&maptype=roadmap&${mapStyles}&scale=2${markers}&key=${mapsKey}`;
   } else if (mapsKey && journeys.length > 0) {
-    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&center=20,0&zoom=1&maptype=roadmap&style=feature:all%7Celement:geometry%7Ccolor:0x1a1a2e&style=feature:all%7Celement:labels.text.fill%7Ccolor:0xE8E0D0&style=feature:all%7Celement:labels.text.stroke%7Ccolor:0x0A0A0A&style=feature:water%7Ccolor:0x0d1b2a&style=feature:road%7Ccolor:0x2a2a3e&scale=2&key=${mapsKey}`;
+    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x350&center=20,10&zoom=2&maptype=roadmap&${mapStyles}&scale=2&key=${mapsKey}`;
   }
 
   return (
