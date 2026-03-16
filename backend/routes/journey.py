@@ -205,7 +205,7 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
         "narrative": stop.narrative,
         "scene_image_url": scene_url,
         "dish_image_url": dish_url,
-        "video_url": video_url,
+        "video_url": "",
         "street_view_url": street_view_url,
         "real_photo_url": real_photo_url,
         "recipe": stop.recipe.model_dump() if stop.recipe else None,
