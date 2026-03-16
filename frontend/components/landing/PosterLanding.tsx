@@ -60,7 +60,19 @@ export function PosterLanding({ onSubmit, isLoading }: PosterLandingProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center" style={{ background: C.bg, color: C.cream, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+    <div className="min-h-screen flex flex-col items-center relative" style={{ color: C.cream, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+
+      {/* Full-screen vintage map background */}
+      <div className="fixed inset-0 z-0">
+        <img
+          src="/images/the-new-york-public-library-axMEtF64OU4-unsplash.jpg"
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+          style={{ filter: "brightness(0.15) saturate(0.4) sepia(0.3)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.92) 70%)" }} />
+      </div>
 
       {/* Auth bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2" style={{ background: "rgba(10,10,10,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.faint}` }}>
@@ -87,9 +99,9 @@ export function PosterLanding({ onSubmit, isLoading }: PosterLandingProps) {
         </div>
       </div>
 
-      {/* Poster container */}
-      <main className="w-full max-w-[780px] mx-auto px-4 py-8 mt-12 md:px-8">
-        <div className="relative border-[2px] p-6 md:p-10" style={{ borderColor: C.dim }}>
+      {/* Poster container — elevated above background */}
+      <main className="relative z-10 w-full max-w-[780px] mx-auto px-4 py-8 mt-12 md:px-8">
+        <div className="relative border-[2px] p-6 md:p-10" style={{ borderColor: C.dim, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(20px)" }}>
           {/* Inner gold border */}
           <div className="absolute inset-2 border pointer-events-none" style={{ borderColor: `${C.gold}44` }} />
 
@@ -274,7 +286,7 @@ export function PosterLanding({ onSubmit, isLoading }: PosterLandingProps) {
         </div>
       </main>
 
-      <p className="text-center italic text-[0.75rem] opacity-25 pb-8" style={{ color: C.cream }}>
+      <p className="relative z-10 text-center italic text-[0.75rem] opacity-25 pb-8" style={{ color: C.cream }}>
         All places and restaurants are AI-suggested. Verify details before visiting.
       </p>
     </div>
