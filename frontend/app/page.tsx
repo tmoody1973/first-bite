@@ -30,6 +30,7 @@ export default function Home() {
         posterUrl={posterUrl}
         videoUrl={videoUrl}
         isGenerating={status === "cinematic"}
+        status={status}
       />
     );
   }

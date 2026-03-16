@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StopCard } from "./StopCard";
 import { ProgressDots } from "./ProgressDots";
@@ -12,6 +12,7 @@ interface StoryFlowProps {
   posterUrl?: string | null;
   videoUrl?: string | null;
   isGenerating?: boolean;
+  status?: string;
 }
 
 export function StoryFlow({
@@ -20,26 +21,47 @@ export function StoryFlow({
   posterUrl,
   videoUrl,
   isGenerating = false,
+  status = "complete",
 }: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-advance to latest stop as they arrive during generation
+  // Auto-advance through the entire journey like Sonic Sommelier
+  // Each stop plays for ~15 seconds, then advances to next
+  const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
+    // Start auto-advance once we have stops and status is complete
+    if (status === "complete" && stops.length > 0 && !autoAdvanceRef.current) {
+      setCurrentIndex(0); // Start from beginning
+
+      autoAdvanceRef.current = setInterval(() => {
+        setCurrentIndex((prev) => {
+          const total = stops.length + (posterUrl ? 1 : 0);
+          if (prev < total - 1) {
+            return prev + 1;
+          }
+          // Reached the end — stop auto-advancing
+          if (autoAdvanceRef.current) {
+            clearInterval(autoAdvanceRef.current);
+            autoAdvanceRef.current = null;
+          }
+          return prev;
+        });
+      }, 15000); // 15 seconds per slide
+    }
+
+    // During cinematic mode, show latest stop
     if (isGenerating && stops.length > 0) {
       setCurrentIndex(stops.length - 1);
     }
-  }, [stops.length, isGenerating]);
 
-  // Auto-advance to poster slide when it becomes available
-  useEffect(() => {
-    if (!isGenerating && posterUrl && stops.length > 0) {
-      // Small delay so user sees the last stop first
-      const timer = setTimeout(() => {
-        setCurrentIndex(stops.length); // poster is at index stops.length
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isGenerating, posterUrl, stops.length]);
+    return () => {
+      if (autoAdvanceRef.current) {
+        clearInterval(autoAdvanceRef.current);
+        autoAdvanceRef.current = null;
+      }
+    };
+  }, [status, stops.length, isGenerating, posterUrl]);
 
   if (stops.length === 0) return null;
 
@@ -50,11 +72,20 @@ export function StoryFlow({
   const canGoBack = currentIndex > 0;
   const canGoForward = currentIndex < totalSlides - 1;
 
+  const stopAutoAdvance = () => {
+    if (autoAdvanceRef.current) {
+      clearInterval(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+  };
+
   const goNext = () => {
+    stopAutoAdvance(); // User took control
     if (canGoForward) setCurrentIndex((i) => i + 1);
   };
 
   const goPrev = () => {
+    stopAutoAdvance(); // User took control
     if (canGoBack) setCurrentIndex((i) => i - 1);
   };
 

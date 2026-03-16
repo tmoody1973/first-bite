@@ -11,6 +11,8 @@ export default function JourneyPage() {
   const params = useParams();
   const journeyId = params.id as string;
   const [stops, setStops] = useState<StopData[]>([]);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,18 +20,35 @@ export default function JourneyPage() {
     fetchJourney(journeyId)
       .then((data) => {
         const mappedStops: StopData[] = (data.stops || []).map(
-          (s: Record<string, unknown>) => ({
-            stopNumber: s.stop_number as number,
-            title: s.title as string,
-            narrative: s.narrative as string,
-            sceneImageUrl: (s.scene_image_url as string) || "",
-            dishImageUrl: (s.dish_image_url as string) || "",
-            recipe: s.recipe as StopData["recipe"],
-            place: s.place as StopData["place"],
-            ttsAudioUrl: (s.tts_audio_url as string) || null,
-          })
+          (s: Record<string, unknown>) => {
+            const place = s.place as Record<string, unknown> | null;
+            return {
+              stopNumber: (s.stop_number as number) || 0,
+              title: (s.title as string) || "",
+              narrative: (s.narrative as string) || "",
+              sceneImageUrl: (s.scene_image_url as string) || "",
+              dishImageUrl: (s.dish_image_url as string) || "",
+              videoUrl: (s.video_url as string) || "",
+              streetViewUrl: (s.street_view_url as string) || "",
+              realPhotoUrl: (s.real_photo_url as string) || "",
+              recipe: s.recipe as StopData["recipe"],
+              place: place
+                ? {
+                    name: (place.name as string) || "",
+                    address: (place.address as string) || "",
+                    footnote: (place.footnote as string) || "",
+                    rating: (place.rating as number) || null,
+                    lat: (place.lat as number) || null,
+                    lng: (place.lng as number) || null,
+                  }
+                : null,
+              ttsAudioUrl: (s.tts_audio_url as string) || null,
+            };
+          }
         );
         setStops(mappedStops);
+        setPosterUrl((data.poster_url as string) || null);
+        setVideoUrl((data.video_url as string) || null);
       })
       .catch(() => setError("Journey not found"))
       .finally(() => setLoading(false));
@@ -47,5 +66,12 @@ export default function JourneyPage() {
     );
   }
 
-  return <StoryFlow stops={stops} journeyId={journeyId} />;
+  return (
+    <StoryFlow
+      stops={stops}
+      journeyId={journeyId}
+      posterUrl={posterUrl}
+      videoUrl={videoUrl}
+    />
+  );
 }
