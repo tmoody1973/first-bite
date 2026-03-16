@@ -32,9 +32,21 @@ export function Hero({ onSubmit, isLoading }: HeroProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="font-serif italic text-[#E8E0D0]/60 text-lg md:text-xl mb-12"
+        className="font-serif italic text-[#E8E0D0]/60 text-lg md:text-xl mb-4"
       >
         The real story starts where the guidebook ends.
+      </motion.p>
+
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="font-sans text-[#E8E0D0]/35 text-sm md:text-base max-w-lg text-center mb-12 leading-relaxed"
+      >
+        Name a place and we'll take you on a 5-stop food journey — AI-generated
+        photography, real restaurant recommendations, home-cookable recipes,
+        narrated storytelling, ambient soundscapes, and a vintage travel poster.
+        All from one prompt.
       </motion.p>
 
       <motion.form
