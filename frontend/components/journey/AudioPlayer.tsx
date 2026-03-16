@@ -21,20 +21,24 @@ export function AudioPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const hasAutoPlayed = useRef(false);
 
+  // Reset autoplay flag when stop changes
+  useEffect(() => {
+    hasAutoPlayed.current = false;
+  }, [stopNumber]);
+
   // Auto-play when TTS URL arrives (like Sonic Sommelier's ElevenLabs narration)
   useEffect(() => {
     if (ttsAudioUrl && autoPlay && !hasAutoPlayed.current) {
       hasAutoPlayed.current = true;
-      // Small delay to let the UI settle
       const timer = setTimeout(() => {
         audioRef.current?.play().catch(() => {
           // Browser may block autoplay — that's ok, user can tap
         });
         setIsPlaying(true);
-      }, 500);
+      }, 800);
       return () => clearTimeout(timer);
     }
-  }, [ttsAudioUrl, autoPlay]);
+  }, [ttsAudioUrl, autoPlay, stopNumber]);
 
   const handleToggle = () => {
     if (!ttsAudioUrl) return;
