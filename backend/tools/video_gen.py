@@ -37,7 +37,7 @@ def generate_journey_video(location: str, stops: list[dict]) -> str:
         prompt = (
             f"A cinematic 8-second travel reel of a food journey through {location}. "
             f"The sequence moves through: {scenes_text}. "
-            f"Documentary style like Anthony Bourdain's Parts Unknown — "
+            f"Documentary style like a food travel show — "
             f"handheld camera, natural lighting, warm saturated colors, "
             f"street-level perspectives of markets, kitchens, and street food stalls. "
             f"Atmospheric and immersive. No text overlays."

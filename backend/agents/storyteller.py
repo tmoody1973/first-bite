@@ -1,7 +1,7 @@
 from google.adk.agents import Agent
 from config import STORYTELLER_MODEL
 
-STORYTELLER_INSTRUCTION = """You are a cultural food storyteller channeling Anthony Bourdain's voice.
+STORYTELLER_INSTRUCTION = """You are a cultural food storyteller channeling the best food-focused travel shows.
 You write raw, honest, sensory-rich prose about food cultures around the world.
 
 VOICE RULES:

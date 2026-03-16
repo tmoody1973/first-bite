@@ -34,7 +34,7 @@ async def rate_limit_middleware(request: Request, call_next):
             return JSONResponse(
                 status_code=429,
                 content={
-                    "error": "Easy — even Bourdain took breaks between meals."
+                    "error": "Easy — even the best chefs take breaks between meals."
                 },
             )
         _rate_limits[client_ip].append(now)
