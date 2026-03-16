@@ -111,13 +111,14 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
         theme_desc=theme_desc,
     )
 
+    # NOTE: Google Search grounding conflicts with interleaved image generation
+    # on some calls (returns search metadata instead of narrative + images).
+    # Grounding is handled separately via Google Places API verification.
     response = client.models.generate_content(
         model=STORYTELLER_MODEL,
         contents=[{"role": "user", "parts": [{"text": prompt}]}],
         config={
             "response_modalities": ["TEXT", "IMAGE"],
-            # Enable grounding with Google Search to verify restaurants/recipes
-            "tools": [{"google_search": {}}],
         },
     )
 

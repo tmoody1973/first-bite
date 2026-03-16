@@ -115,25 +115,15 @@ export function useJourneyStream() {
           // Update progress counter so loading screen shows progress
           setStopsGenerated(journeyStops.length);
 
-          // Wait for 4 stops before revealing (smoother experience)
-          if (journeyStops.length >= 4) {
-            setStatus("cinematic");
-            setStops(journeyStops.map(mapStop));
-          }
-
+          // Wait for EVERYTHING to be ready before revealing (like Sonic Sommelier)
           if (journey.status === "ready") {
             setStops(journeyStops.map(mapStop));
             setPosterUrl((journey.poster_url as string) || null);
-            const vid = (journey.video_url as string) || null;
-            setVideoUrl(vid);
+            setVideoUrl((journey.video_url as string) || null);
 
-            if (vid) {
-              // Video is ready — stop polling
-              if (pollingRef.current) clearInterval(pollingRef.current);
-              pollingRef.current = null;
-            }
-            // Keep polling for video even after ready (Phase 2 enhancement)
-            // But mark as complete so user can browse
+            // Stop polling and reveal
+            if (pollingRef.current) clearInterval(pollingRef.current);
+            pollingRef.current = null;
             setStatus("complete");
           } else if (journey.status === "error") {
             if (pollingRef.current) clearInterval(pollingRef.current);

@@ -20,16 +20,15 @@ export default function Home() {
     return <LoadingQuips stopsGenerated={stopsGenerated} />;
   }
 
-  // Cinematic mode or complete — show the journey
-  if (status === "cinematic" || status === "complete") {
+  // Complete — show the full journey from stop 1 (like Sonic Sommelier)
+  if (status === "complete" && stops.length > 0) {
     return (
       <StoryFlow
         stops={stops}
         journeyId={journeyId}
         posterUrl={posterUrl}
         videoUrl={videoUrl}
-        isGenerating={status === "cinematic"}
-        status={status}
+        status="complete"
       />
     );
   }

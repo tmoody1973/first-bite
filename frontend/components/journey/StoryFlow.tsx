@@ -11,7 +11,6 @@ interface StoryFlowProps {
   journeyId: string | null;
   posterUrl?: string | null;
   videoUrl?: string | null;
-  isGenerating?: boolean;
   status?: string;
 }
 
@@ -20,37 +19,29 @@ export function StoryFlow({
   journeyId,
   posterUrl,
   videoUrl,
-  isGenerating = false,
   status = "complete",
 }: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Auto-advance through the entire journey like Sonic Sommelier
-  // Each stop plays for ~15 seconds, then advances to next
   const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialized = useRef(false);
 
-  const hasStartedAutoAdvance = useRef(false);
-
+  // Simple: start at 0, auto-advance. No cinematic mode.
   useEffect(() => {
-    // When generation completes, ALWAYS start from stop 1
-    if (status === "complete" && stops.length > 0 && !hasStartedAutoAdvance.current) {
-      hasStartedAutoAdvance.current = true;
-      setCurrentIndex(0); // Start from beginning
+    if (stops.length === 0 || initialized.current) return;
+    initialized.current = true;
+    setCurrentIndex(0);
 
-      autoAdvanceRef.current = setInterval(() => {
-        setCurrentIndex((prev) => {
-          const total = stops.length + (posterUrl ? 1 : 0);
-          if (prev < total - 1) {
-            return prev + 1;
-          }
-          if (autoAdvanceRef.current) {
-            clearInterval(autoAdvanceRef.current);
-            autoAdvanceRef.current = null;
-          }
-          return prev;
-        });
-      }, 45000);
-    }
+    autoAdvanceRef.current = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const total = stops.length + (posterUrl ? 1 : 0);
+        if (prev < total - 1) return prev + 1;
+        if (autoAdvanceRef.current) {
+          clearInterval(autoAdvanceRef.current);
+          autoAdvanceRef.current = null;
+        }
+        return prev;
+      });
+    }, 45000);
 
     return () => {
       if (autoAdvanceRef.current) {
@@ -58,18 +49,11 @@ export function StoryFlow({
         autoAdvanceRef.current = null;
       }
     };
-  }, [status, stops.length, posterUrl]);
-
-  // During cinematic mode only, show latest stop
-  useEffect(() => {
-    if (isGenerating && stops.length > 0 && !hasStartedAutoAdvance.current) {
-      setCurrentIndex(stops.length - 1);
-    }
-  }, [isGenerating, stops.length]);
+  }, [stops.length, posterUrl]);
 
   if (stops.length === 0) return null;
 
-  const showPoster = !isGenerating && posterUrl;
+  const showPoster = !!posterUrl;
   const totalSlides = stops.length + (showPoster ? 1 : 0);
   const isPosterSlide = showPoster && currentIndex === stops.length;
   const currentStop = isPosterSlide ? null : stops[currentIndex];
@@ -127,8 +111,8 @@ export function StoryFlow({
         &larr; Gallery
       </a>
 
-      {/* Generating indicator */}
-      {isGenerating && (
+      {/* Generating indicator — only if somehow still generating */}
+      {status !== "complete" && (
         <div className="fixed top-5 left-4 z-50 flex items-center gap-2">
           <motion.div
             animate={{ rotate: 360 }}
