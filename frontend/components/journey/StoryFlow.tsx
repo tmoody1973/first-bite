@@ -81,6 +81,16 @@ export function StoryFlow({
     window.onkeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
       if (e.key === "ArrowLeft") goPrev();
+      // Jump to poster slide (for demo recording)
+      if (e.key === "End" || e.key === "p") {
+        stopAutoAdvance();
+        setCurrentIndex(totalSlides - 1);
+      }
+      // Jump to start
+      if (e.key === "Home") {
+        stopAutoAdvance();
+        setCurrentIndex(0);
+      }
     };
   }
 
