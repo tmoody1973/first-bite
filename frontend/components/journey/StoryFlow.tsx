@@ -30,6 +30,17 @@ export function StoryFlow({
     }
   }, [stops.length, isGenerating]);
 
+  // Auto-advance to poster slide when it becomes available
+  useEffect(() => {
+    if (!isGenerating && posterUrl && stops.length > 0) {
+      // Small delay so user sees the last stop first
+      const timer = setTimeout(() => {
+        setCurrentIndex(stops.length); // poster is at index stops.length
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isGenerating, posterUrl, stops.length]);
+
   if (stops.length === 0) return null;
 
   const showPoster = !isGenerating && posterUrl;
