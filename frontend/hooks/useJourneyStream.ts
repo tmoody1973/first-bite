@@ -46,6 +46,7 @@ export function useJourneyStream() {
   const [stopsGenerated, setStopsGenerated] = useState(0);
   const [journeyId, setJourneyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Clean up polling on unmount
@@ -55,7 +56,7 @@ export function useJourneyStream() {
     };
   }, []);
 
-  const startJourney = useCallback(async (prompt: string) => {
+  const startJourney = useCallback(async (prompt: string, userId?: string) => {
     setStops([]);
     setStatus("loading");
     setError(null);
@@ -67,7 +68,7 @@ export function useJourneyStream() {
       const res = await fetch(`${API_URL}/api/journey`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, userId }),
       });
 
       if (!res.ok) {
@@ -96,6 +97,7 @@ export function useJourneyStream() {
             if (pollingRef.current) clearInterval(pollingRef.current);
             pollingRef.current = null;
             setStops(journeyStops.map(mapStop));
+            setPosterUrl((journey.poster_url as string) || null);
             setStatus("complete");
           } else if (journey.status === "error") {
             if (pollingRef.current) clearInterval(pollingRef.current);
@@ -113,5 +115,5 @@ export function useJourneyStream() {
     }
   }, []);
 
-  return { stops, status, stopsGenerated, journeyId, error, startJourney };
+  return { stops, status, stopsGenerated, journeyId, error, posterUrl, startJourney };
 }

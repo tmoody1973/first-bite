@@ -9,17 +9,19 @@ import type { StopData } from "@/hooks/useJourneyStream";
 interface StoryFlowProps {
   stops: StopData[];
   journeyId: string | null;
+  posterUrl?: string | null;
 }
 
-export function StoryFlow({ stops, journeyId }: StoryFlowProps) {
+export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (stops.length === 0) return null;
 
-  const currentStop = stops[currentIndex];
+  const totalSlides = stops.length + (posterUrl ? 1 : 0);
+  const isPosterSlide = posterUrl && currentIndex === stops.length;
+  const currentStop = isPosterSlide ? null : stops[currentIndex];
   const canGoBack = currentIndex > 0;
-  const canGoForward = currentIndex < stops.length - 1;
-  const isLastStop = currentIndex === stops.length - 1 && stops.length >= 5;
+  const canGoForward = currentIndex < totalSlides - 1;
 
   const goNext = () => {
     if (canGoForward) setCurrentIndex((i) => i + 1);
@@ -31,19 +33,17 @@ export function StoryFlow({ stops, journeyId }: StoryFlowProps) {
 
   // Keyboard navigation
   if (typeof window !== "undefined") {
-    const handler = (e: KeyboardEvent) => {
+    window.onkeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
       if (e.key === "ArrowLeft") goPrev();
     };
-    // Using a simple approach for hackathon speed
-    window.onkeydown = handler;
   }
 
   return (
     <div className="fixed inset-0 bg-[#0A0A0A] overflow-hidden">
       {/* Progress bar at top */}
       <div className="fixed top-0 left-0 right-0 z-50 flex gap-1 px-3 pt-3">
-        {stops.map((_, i) => (
+        {Array.from({ length: totalSlides }, (_, i) => (
           <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/10">
             <motion.div
               className="h-full bg-[#C4652A]"
@@ -56,20 +56,65 @@ export function StoryFlow({ stops, journeyId }: StoryFlowProps) {
       </div>
 
       {/* Stop counter */}
-      <ProgressDots current={currentIndex + 1} total={Math.max(stops.length, 5)} />
+      <ProgressDots current={currentIndex + 1} total={totalSlides} />
 
-      {/* Full-screen stop */}
+      {/* Full-screen content */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStop.stopNumber}
-          initial={{ opacity: 0, x: 60 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -60 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="h-full"
-        >
-          <StopCard stop={currentStop} journeyId={journeyId} />
-        </motion.div>
+        {isPosterSlide ? (
+          /* Travel poster — final slide */
+          <motion.div
+            key="poster"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="h-full flex flex-col items-center justify-center px-6"
+          >
+            <img
+              src={posterUrl}
+              alt="Travel poster"
+              className="max-h-[70vh] max-w-full rounded-2xl shadow-2xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-8 text-center"
+            >
+              <p className="font-serif italic text-lg text-[#E8E0D0]/60 mb-4">
+                Your journey, captured.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <a
+                  href="/"
+                  className="font-sans text-xs px-5 py-2.5 rounded-full bg-[#C4652A] text-white hover:bg-[#C4652A]/80 transition-colors"
+                >
+                  New Journey
+                </a>
+                <a
+                  href="/dashboard"
+                  className="font-sans text-xs px-5 py-2.5 rounded-full border border-[#E8E0D0]/10 text-[#E8E0D0]/50 hover:border-[#C4652A]/30 hover:text-[#C4652A] transition-colors"
+                >
+                  My Journeys
+                </a>
+              </div>
+              <p className="font-sans text-[10px] text-[#E8E0D0]/20 mt-6">
+                All places are AI-suggested. Verify before visiting.
+              </p>
+            </motion.div>
+          </motion.div>
+        ) : currentStop ? (
+          <motion.div
+            key={currentStop.stopNumber}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="h-full"
+          >
+            <StopCard stop={currentStop} journeyId={journeyId} />
+          </motion.div>
+        ) : null}
       </AnimatePresence>
 
       {/* Navigation tap zones */}
@@ -98,15 +143,6 @@ export function StoryFlow({ stops, journeyId }: StoryFlowProps) {
         >
           &#8594;
         </button>
-      )}
-
-      {/* Last stop disclaimer */}
-      {isLastStop && (
-        <div className="fixed bottom-4 left-0 right-0 z-50 text-center">
-          <p className="font-sans text-[10px] text-[#E8E0D0]/20">
-            All places are AI-suggested. Verify before visiting.
-          </p>
-        </div>
       )}
     </div>
   );
