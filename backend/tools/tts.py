@@ -9,8 +9,8 @@ from services.storage import upload_audio
 
 logger = logging.getLogger(__name__)
 
-# Max chars for TTS — keeps audio under ~90 seconds
-MAX_TTS_CHARS = 1500
+# Max chars for TTS — keeps audio under ~60 seconds
+MAX_TTS_CHARS = 800
 
 
 def generate_tts(text: str, voice: str = "Charon") -> str:
