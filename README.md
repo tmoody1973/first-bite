@@ -43,7 +43,7 @@ Each journey follows a narrative arc:
 
 ## Architecture
 
-![First Bite Architecture](docs/architecture.png)
+![First Bite Architecture](docs/architecture.jpg)
 
 ---
 
