@@ -66,6 +66,7 @@ export function useJourneyStream() {
   const [journeyId, setJourneyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevStopCountRef = useRef(0);
 
@@ -119,6 +120,7 @@ export function useJourneyStream() {
             pollingRef.current = null;
             setStops(journeyStops.map(mapStop));
             setPosterUrl((journey.poster_url as string) || null);
+            setVideoUrl((journey.video_url as string) || null);
             setStatus("complete");
           } else if (journey.status === "error") {
             if (pollingRef.current) clearInterval(pollingRef.current);
@@ -136,5 +138,5 @@ export function useJourneyStream() {
     }
   }, []);
 
-  return { stops, status, journeyId, error, posterUrl, startJourney };
+  return { stops, status, journeyId, error, posterUrl, videoUrl, startJourney };
 }

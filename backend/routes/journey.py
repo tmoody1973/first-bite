@@ -21,7 +21,7 @@ from services.firestore import (
 from tools.tts import generate_tts
 from tools.image_gen import generate_dish_image
 from tools.places import search_place, get_street_view_url, get_street_view_url_from_address
-from tools.video_gen import generate_stop_video
+from tools.video_gen import generate_journey_video
 
 router = APIRouter()
 
@@ -303,19 +303,17 @@ def generate_journey_background(journey_id: str, prompt: str):
         except Exception as e:
             logger.warning(f"Journey {journey_id}: poster failed: {e}")
 
-        # Veo videos for each stop (runs after user already has the experience)
-        for i, stop_data in enumerate(stops):
-            stop_num = i + 1
-            try:
-                logger.info(f"Journey {journey_id}: generating Veo video for stop {stop_num}...")
-                theme_desc = STOP_THEMES[i][1] if i < len(STOP_THEMES) else ""
-                video_url = generate_stop_video(prompt, stop_data["title"], theme_desc)
-                if video_url:
-                    stops[i]["video_url"] = video_url
-                    update_journey_stops(journey_id, stops)
-                    logger.info(f"Journey {journey_id}: video {stop_num} saved")
-            except Exception as e:
-                logger.warning(f"Journey {journey_id}: Veo stop {stop_num} failed: {e}")
+        # Veo — one summary video for the whole journey
+        try:
+            logger.info(f"Journey {journey_id}: generating Veo journey video...")
+            video_url = generate_journey_video(prompt, stops)
+            if video_url:
+                from services.firestore import _get_db
+                db = _get_db()
+                db.collection("journeys").document(journey_id).update({"video_url": video_url})
+                logger.info(f"Journey {journey_id}: journey video saved")
+        except Exception as e:
+            logger.warning(f"Journey {journey_id}: Veo failed: {e}")
 
         logger.info(f"Journey {journey_id}: FULLY COMPLETE (phase 2 done)")
 

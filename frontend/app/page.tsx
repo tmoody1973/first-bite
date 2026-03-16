@@ -9,7 +9,7 @@ import { useJourneyStream } from "@/hooks/useJourneyStream";
 
 export default function Home() {
   const { user, isSignedIn } = useUser();
-  const { stops, status, journeyId, error, posterUrl, startJourney } =
+  const { stops, status, journeyId, error, posterUrl, videoUrl, startJourney } =
     useJourneyStream();
 
   const handleSubmit = (prompt: string) => {
@@ -28,6 +28,7 @@ export default function Home() {
         stops={stops}
         journeyId={journeyId}
         posterUrl={posterUrl}
+        videoUrl={videoUrl}
         isGenerating={status === "cinematic"}
       />
     );

@@ -10,6 +10,7 @@ interface StoryFlowProps {
   stops: StopData[];
   journeyId: string | null;
   posterUrl?: string | null;
+  videoUrl?: string | null;
   isGenerating?: boolean;
 }
 
@@ -17,6 +18,7 @@ export function StoryFlow({
   stops,
   journeyId,
   posterUrl,
+  videoUrl,
   isGenerating = false,
 }: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -99,11 +101,32 @@ export function StoryFlow({
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="h-full flex flex-col items-center justify-center px-6"
           >
+            {/* Journey video (if available) */}
+            {videoUrl && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-6 w-full max-w-lg"
+              >
+                <video
+                  src={videoUrl}
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full rounded-2xl shadow-2xl"
+                />
+              </motion.div>
+            )}
+
+            {/* Travel poster */}
             <img
               src={posterUrl!}
               alt="Travel poster"
-              className="max-h-[70vh] max-w-full rounded-2xl shadow-2xl"
+              className="max-h-[50vh] max-w-full rounded-2xl shadow-2xl"
             />
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -114,13 +137,24 @@ export function StoryFlow({
                 Your journey, captured.
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
+                {/* Download poster */}
+                <a
+                  href={posterUrl!}
+                  download="first-bite-poster.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-xs px-5 py-2.5 rounded-full bg-[#C4652A] text-white hover:bg-[#C4652A]/80 transition-colors"
+                >
+                  Download Poster
+                </a>
+                {/* Share */}
                 <button
                   onClick={() => {
                     const shareUrl = `${window.location.origin}/journey/${journeyId}`;
                     navigator.clipboard.writeText(shareUrl);
                     alert("Share link copied!");
                   }}
-                  className="font-sans text-xs px-5 py-2.5 rounded-full bg-[#C4652A] text-white hover:bg-[#C4652A]/80 transition-colors"
+                  className="font-sans text-xs px-5 py-2.5 rounded-full border border-[#E8E0D0]/10 text-[#E8E0D0]/50 hover:border-[#C4652A]/30 hover:text-[#C4652A] transition-colors"
                 >
                   Share Journey
                 </button>
