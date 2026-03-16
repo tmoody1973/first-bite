@@ -144,6 +144,78 @@ The response returns alternating text and image parts. A parser extracts the nar
 
 ---
 
+## Try it live (testing instructions)
+
+No setup required. The app is deployed and ready to use.
+
+### Step 1: Open the app
+
+Go to **https://first-bite.vercel.app**
+
+### Step 2: Sign in
+
+Click **"Sign In"** or **"Get Started"** in the top right. You can sign in with Google or create an account with email.
+
+### Step 3: Start a journey
+
+Type a place in the input field and click **"Bon Voyage"**. Try one of these:
+
+- `Street food in Lagos`
+- `Night markets of Bangkok`
+- `Grandmother kitchens of Tbilisi`
+- `Dock workers' breakfast in Lisbon`
+
+Or click any of the suggestion pills below the input.
+
+### Step 4: Wait for generation (~3-4 minutes)
+
+The loading screen shows progress as each stop generates. You'll see checkmarks appear as stops complete (1 of 5, 2 of 5, etc.). Floating food photos provide visual ambiance while you wait.
+
+### Step 5: Experience the journey
+
+Once all 5 stops and the travel poster are ready, the experience reveals automatically starting at **Stop 1: The Arrival**. Each stop includes:
+
+- Full-screen AI-generated scene as background
+- Narrative text with cultural history
+- Photo carousel (AI scene → Street View → real Google Places photo)
+- Voice narration (auto-plays)
+- Ambient soundscape (plays at low volume under narration)
+- Recipe card (tap the dish thumbnail to expand, tap "Save" to download as PNG)
+- Verified restaurant with rating (tap "View on Map" for Google Maps)
+
+### Step 6: Navigate
+
+- **Tap right side of screen** or press **→** to go to next stop
+- **Tap left side** or press **←** to go back
+- Narration auto-advances to the next stop when it finishes
+- Press **P** to jump to the poster/video finale
+- Press **Home** to jump back to Stop 1
+
+### Step 7: The finale
+
+The last slide shows a vintage French travel poster with all 5 dishes and restaurants. If the Veo video has finished generating, it plays full-screen behind the poster. You can:
+
+- **Download the poster** as an image
+- **Share the journey** — copies a public link anyone can view without an account
+- **Start a new journey**
+- **Go to your dashboard**
+
+### Step 8: Dashboard
+
+Click **"My Journeys"** or **"Gallery"** to see all your saved journeys. The world map shows pins for each destination. Click any journey card to revisit the full experience.
+
+### What to look for
+
+- **Interleaved output** — text and AI images generated together in one Gemini call per stop
+- **Cultural storytelling** — history, trade routes, origin stories woven into every narrative
+- **Real restaurant data** — verified names, addresses, and ratings from Google Places
+- **Audio layers** — TTS narration on top, ambient soundscape underneath
+- **Recipe cards** — full ingredients and steps, downloadable as PNG
+- **Travel poster** — vintage French lithograph style with all dishes
+- **Journey video** — Veo 3.1 cinematic recap on the final slide
+
+---
+
 ## Quick start (spin-up instructions)
 
 Get the app running locally in under 5 minutes.
