@@ -87,7 +87,7 @@ export function StoryFlow({
       {/* Back to gallery button */}
       <a
         href="/dashboard"
-        className="fixed top-5 left-4 z-50 font-sans text-[10px] text-[#E8E0D0]/30 uppercase tracking-wider hover:text-[#C4652A] transition-colors"
+        className="fixed top-5 left-4 z-50 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm font-sans text-xs text-[#E8E0D0]/60 hover:text-white hover:bg-black/60 transition-colors"
       >
         &larr; Gallery
       </a>
