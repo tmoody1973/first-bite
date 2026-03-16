@@ -288,12 +288,7 @@ def generate_journey_background(journey_id: str, prompt: str):
                 f"dish={bool(stop_data['dish_image_url'])} recipe={bool(stop_data['recipe'])}"
             )
 
-        # Mark as READY — user can start viewing now
-        update_journey_status(journey_id, "ready")
-        logger.info(f"Journey {journey_id}: READY — {len(stops)} stops (phase 1 complete)")
-
-        # PHASE 2: Background enhancements (videos + poster, non-blocking)
-        # Travel poster
+        # Generate poster BEFORE marking ready so frontend gets it
         try:
             logger.info(f"Journey {journey_id}: generating travel poster...")
             poster_url = _generate_travel_poster(client, prompt, stops)
@@ -303,7 +298,11 @@ def generate_journey_background(journey_id: str, prompt: str):
         except Exception as e:
             logger.warning(f"Journey {journey_id}: poster failed: {e}")
 
-        # Veo — one summary video for the whole journey
+        # Mark as READY — user can start viewing now (poster included)
+        update_journey_status(journey_id, "ready")
+        logger.info(f"Journey {journey_id}: READY — {len(stops)} stops + poster")
+
+        # PHASE 2: Veo video (truly background, non-blocking)
         try:
             logger.info(f"Journey {journey_id}: generating Veo journey video...")
             video_url = generate_journey_video(prompt, stops)

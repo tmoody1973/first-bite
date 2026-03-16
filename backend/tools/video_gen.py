@@ -52,7 +52,6 @@ def generate_journey_video(location: str, stops: list[dict]) -> str:
                 "number_of_videos": 1,
                 "duration_seconds": 8,
                 "aspect_ratio": "16:9",
-                "person_generation": "allow_adult",
             },
         )
 
