@@ -1,4 +1,4 @@
-# How I built First Bite: a creative storytelling agent that actually composes
+# How I built First Bite: the agent that turns one sentence into an 8-modality food journey
 
 *I created this piece for the Gemini Live Agent Challenge hackathon (#GeminiLiveAgentChallenge). What follows is an honest account of building a multimodal storytelling agent with Gemini's interleaved output over a long weekend.*
 
