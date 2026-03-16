@@ -4,7 +4,7 @@ Uses Places API (New) with minimal fields to control costs."""
 import os
 import requests
 import logging
-from config import GOOGLE_API_KEY
+from config import GOOGLE_MAPS_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def search_place(name: str, address: str) -> dict | None:
             PLACES_SEARCH_URL,
             headers={
                 "Content-Type": "application/json",
-                "X-Goog-Api-Key": GOOGLE_API_KEY,
+                "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
                 # IMPORTANT: Only request basic fields to keep costs low
                 "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.rating,places.location,places.photos",
             },
@@ -58,7 +58,7 @@ def search_place(name: str, address: str) -> dict | None:
             if photo_name:
                 result["photo_url"] = (
                     f"https://places.googleapis.com/v1/{photo_name}/media"
-                    f"?maxHeightPx=400&maxWidthPx=600&key={GOOGLE_API_KEY}"
+                    f"?maxHeightPx=400&maxWidthPx=600&key={GOOGLE_MAPS_API_KEY}"
                 )
 
         return result
@@ -74,7 +74,7 @@ def get_street_view_url(lat: float, lng: float, width: int = 600, height: int = 
         f"{STREET_VIEW_BASE}?size={width}x{height}"
         f"&location={lat},{lng}"
         f"&fov=90&heading=0&pitch=0"
-        f"&key={GOOGLE_API_KEY}"
+        f"&key={GOOGLE_MAPS_API_KEY}"
     )
 
 
@@ -84,5 +84,5 @@ def get_street_view_url_from_address(address: str, width: int = 600, height: int
         f"{STREET_VIEW_BASE}?size={width}x{height}"
         f"&location={requests.utils.quote(address)}"
         f"&fov=90&heading=0&pitch=0"
-        f"&key={GOOGLE_API_KEY}"
+        f"&key={GOOGLE_MAPS_API_KEY}"
     )
