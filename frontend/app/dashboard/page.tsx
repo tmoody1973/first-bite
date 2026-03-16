@@ -35,16 +35,15 @@ export default function DashboardPage() {
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
   const journeysWithCoords = journeys.filter((j) => j.lat && j.lng);
 
-  // Build an interactive embed map with markers
-  // Using Maps Embed API with "view" mode, or place mode for single pin
-  let mapEmbedUrl: string | null = null;
+  // Maps Static API with markers — supports pins unlike Embed API
+  let mapUrl: string | null = null;
   if (mapsKey && journeysWithCoords.length > 0) {
-    // Use the first journey's coords as center, show all as a view
-    const center = journeysWithCoords[0];
-    mapEmbedUrl = `https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${center.lat},${center.lng}&zoom=3&maptype=roadmap`;
+    const markers = journeysWithCoords
+      .map((j, i) => `&markers=color:0xC4652A%7Clabel:${i + 1}%7C${j.lat},${j.lng}`)
+      .join("");
+    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all%7Celement:geometry%7Ccolor:0x1a1a2e&style=feature:all%7Celement:labels.text.fill%7Ccolor:0xE8E0D0&style=feature:all%7Celement:labels.text.stroke%7Ccolor:0x0A0A0A&style=feature:water%7Ccolor:0x0d1b2a&style=feature:road%7Ccolor:0x2a2a3e&scale=2${markers}&key=${mapsKey}`;
   } else if (mapsKey && journeys.length > 0) {
-    // No coords — show world view
-    mapEmbedUrl = `https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=20,0&zoom=2&maptype=roadmap`;
+    mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&center=20,0&zoom=1&maptype=roadmap&style=feature:all%7Celement:geometry%7Ccolor:0x1a1a2e&style=feature:all%7Celement:labels.text.fill%7Ccolor:0xE8E0D0&style=feature:all%7Celement:labels.text.stroke%7Ccolor:0x0A0A0A&style=feature:water%7Ccolor:0x0d1b2a&style=feature:road%7Ccolor:0x2a2a3e&scale=2&key=${mapsKey}`;
   }
 
   return (
@@ -79,22 +78,18 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Interactive world map */}
-      {mapEmbedUrl && (
+      {/* World map with journey pins */}
+      {mapUrl && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto mb-8 rounded-2xl overflow-hidden border border-[#E8E0D0]/[0.06]"
         >
-          <iframe
-            src={mapEmbedUrl}
-            width="100%"
-            height="280"
-            style={{ border: 0 }}
-            allowFullScreen
+          <img
+            src={mapUrl}
+            alt="Your food journeys around the world"
+            className="w-full h-auto"
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Your food journey map"
           />
           <div className="bg-white/[0.02] px-4 py-2 flex items-center justify-between">
             <span className="font-sans text-[11px] text-[#E8E0D0]/30">
