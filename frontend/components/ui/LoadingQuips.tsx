@@ -15,65 +15,79 @@ const PIPELINE_STEPS = [
   { label: "The Last Bite — what this place taught you", theme: "Stop 5" },
 ];
 
-// Ambient images that float during loading — reuse landing page photos
+// Ambient images that float during loading
 const FLOATING_IMAGES = [
   "/images/selena-jimenez-rltaNQ1m7XI-unsplash.jpg",
   "/images/tunde-buremo-cnVn4Gg4b00-unsplash.jpg",
   "/images/ben-iwara-KFO2m5Ms1Pc-unsplash.jpg",
   "/images/george-dagerotip-GJU-Oqe8OAc-unsplash.jpg",
   "/images/wkndr-V9YD8obUvUc-unsplash.jpg",
+  "/images/anbinh-pho-nrG5JaMvBEo-unsplash.jpg",
+  "/images/ato-aikins-xzM6dK7nxME-unsplash.jpg",
+  "/images/colin-meg-KHl8mAMpt6Y-unsplash.jpg",
+  "/images/fenghua-KTYXROb0NJ4-unsplash.jpg",
+  "/images/jon-spectacle-ho24w5XM0sw-unsplash.jpg",
+  "/images/le-thanh-huyen-zkQyNGTXBzI-unsplash.jpg",
+  "/images/mche-lee-Y4CUNo-HJco-unsplash(1).jpg",
+  "/images/monika-borys-reHjqJ-5dPM-unsplash.jpg",
+  "/images/seyiram-kweku-I9YlJppV_TQ-unsplash.jpg",
 ];
 
-// Random positions for floating images
+// Positions — spread across edges so they don't cover the center content
 const POSITIONS = [
-  { top: "5%", left: "5%", rotate: -8, size: 180 },
-  { top: "10%", right: "8%", rotate: 6, size: 160 },
-  { bottom: "15%", left: "8%", rotate: -4, size: 150 },
-  { bottom: "10%", right: "5%", rotate: 10, size: 170 },
-  { top: "40%", left: "2%", rotate: -12, size: 140 },
-  { top: "35%", right: "3%", rotate: 8, size: 155 },
+  { top: "3%", left: "3%", rotate: -8 },
+  { top: "5%", right: "4%", rotate: 6 },
+  { bottom: "8%", left: "4%", rotate: -5 },
+  { bottom: "5%", right: "3%", rotate: 10 },
+  { top: "35%", left: "1%", rotate: -12 },
+  { top: "30%", right: "1%", rotate: 7 },
+  { bottom: "30%", left: "2%", rotate: 4 },
+  { bottom: "35%", right: "2%", rotate: -9 },
 ];
 
 export function LoadingQuips({ stopsGenerated }: LoadingQuipsProps) {
   const [visibleImages, setVisibleImages] = useState<number[]>([]);
 
-  // Cycle through floating images — show 2 at a time, swap every 3 seconds
+  // Cycle through floating images — show 3 at a time, swap every 2.5 seconds
   useEffect(() => {
     let imageIndex = 0;
     const showNext = () => {
-      const idx1 = imageIndex % FLOATING_IMAGES.length;
-      const idx2 = (imageIndex + 1) % FLOATING_IMAGES.length;
-      setVisibleImages([idx1, idx2]);
+      const indices = [
+        imageIndex % FLOATING_IMAGES.length,
+        (imageIndex + 3) % FLOATING_IMAGES.length,
+        (imageIndex + 7) % FLOATING_IMAGES.length,
+      ];
+      setVisibleImages(indices);
       imageIndex++;
     };
 
     showNext();
-    const interval = setInterval(showNext, 3000);
+    const interval = setInterval(showNext, 2500);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="fixed inset-0 bg-[#0A0A0A] flex flex-col items-center justify-center px-6 overflow-hidden">
 
-      {/* Floating ambient images — drift in and out behind the content */}
-      <AnimatePresence>
+      {/* Floating ambient images — drift in and fade out behind the content */}
+      <AnimatePresence mode="popLayout">
         {visibleImages.map((imgIdx, i) => {
           const pos = POSITIONS[(imgIdx + i * 3) % POSITIONS.length];
           return (
             <motion.div
-              key={`${imgIdx}-${i}-${Math.floor(Date.now() / 3000)}`}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.12, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute pointer-events-none"
+              key={`float-${imgIdx}-${i}-${Math.floor(Date.now() / 2500)}`}
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={{ opacity: 0.15, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.05, y: -10 }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+              className="absolute pointer-events-none hidden md:block"
               style={{
                 top: pos.top,
                 left: pos.left,
                 right: pos.right,
                 bottom: pos.bottom,
-                width: pos.size,
-                height: pos.size,
+                width: "clamp(120px, 15vw, 200px)",
+                height: "clamp(120px, 15vw, 200px)",
                 transform: `rotate(${pos.rotate}deg)`,
               }}
             >
@@ -82,16 +96,35 @@ export function LoadingQuips({ stopsGenerated }: LoadingQuipsProps) {
                 alt=""
                 aria-hidden="true"
                 className="w-full h-full object-cover rounded-lg"
-                style={{ filter: "brightness(0.6) saturate(0.5)" }}
+                style={{ filter: "brightness(0.5) saturate(0.4) sepia(0.15)" }}
               />
-              {/* Polaroid frame effect */}
               <div
                 className="absolute inset-0 rounded-lg"
-                style={{ border: "3px solid rgba(232,224,217,0.08)" }}
+                style={{ border: "2px solid rgba(232,224,217,0.06)" }}
               />
             </motion.div>
           );
         })}
+      </AnimatePresence>
+
+      {/* Mobile: single fading image behind content, more subtle */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`mobile-${visibleImages[0]}-${Math.floor(Date.now() / 2500)}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.08 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
+          className="absolute inset-0 md:hidden pointer-events-none"
+        >
+          <img
+            src={FLOATING_IMAGES[visibleImages[0] || 0]}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover"
+            style={{ filter: "brightness(0.4) saturate(0.3) blur(2px)" }}
+          />
+        </motion.div>
       </AnimatePresence>
 
       {/* Content — centered on top of floating images */}
