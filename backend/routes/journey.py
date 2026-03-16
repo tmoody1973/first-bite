@@ -180,14 +180,8 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
             # Fallback: Street View from address string
             street_view_url = get_street_view_url_from_address(stop.place.address)
 
-    # Generate Veo video clip (ambient B-roll)
-    video_url = ""
-    try:
-        video_url = generate_stop_video(
-            location, stop.title, theme_desc
-        )
-    except Exception as e:
-        logger.warning(f"Stop {stop_num}: Veo failed: {e}")
+    # NOTE: Veo video runs AFTER journey is marked ready (background enhancement)
+    # to avoid blocking the core experience
 
     # Generate TTS narration automatically
     tts_url = None
@@ -264,11 +258,16 @@ def _generate_travel_poster(client, prompt: str, stops: list[dict]) -> str:
 
 
 def generate_journey_background(journey_id: str, prompt: str):
-    """Generate all 5 stops and save to Firestore. Runs in background."""
+    """Generate all 5 stops and save to Firestore. Runs in background.
+
+    Phase 1: Generate stops (text + images + Places + Street View + TTS) → mark ready
+    Phase 2: Generate Veo videos + travel poster in background (enhances after ready)
+    """
     try:
         client = genai.Client(api_key=GOOGLE_API_KEY)
         stops = []
 
+        # PHASE 1: Core experience (~3-4 min)
         for stop_num in range(1, 6):
             logger.info(f"Journey {journey_id}: generating stop {stop_num}...")
             stop_data = generate_single_stop(client, prompt, stop_num)
@@ -282,16 +281,36 @@ def generate_journey_background(journey_id: str, prompt: str):
                 f"dish={bool(stop_data['dish_image_url'])} recipe={bool(stop_data['recipe'])}"
             )
 
-        # Generate travel poster (like Sonic Sommelier's share image)
-        logger.info(f"Journey {journey_id}: generating travel poster...")
-        poster_url = _generate_travel_poster(client, prompt, stops)
-        if poster_url:
-            update_journey_poster(journey_id, poster_url)
-            logger.info(f"Journey {journey_id}: poster saved")
-
-        # Mark as ready
+        # Mark as READY — user can start viewing now
         update_journey_status(journey_id, "ready")
-        logger.info(f"Journey {journey_id}: COMPLETE — {len(stops)} stops")
+        logger.info(f"Journey {journey_id}: READY — {len(stops)} stops (phase 1 complete)")
+
+        # PHASE 2: Background enhancements (videos + poster, non-blocking)
+        # Travel poster
+        try:
+            logger.info(f"Journey {journey_id}: generating travel poster...")
+            poster_url = _generate_travel_poster(client, prompt, stops)
+            if poster_url:
+                update_journey_poster(journey_id, poster_url)
+                logger.info(f"Journey {journey_id}: poster saved")
+        except Exception as e:
+            logger.warning(f"Journey {journey_id}: poster failed: {e}")
+
+        # Veo videos for each stop (runs after user already has the experience)
+        for i, stop_data in enumerate(stops):
+            stop_num = i + 1
+            try:
+                logger.info(f"Journey {journey_id}: generating Veo video for stop {stop_num}...")
+                theme_desc = STOP_THEMES[i][1] if i < len(STOP_THEMES) else ""
+                video_url = generate_stop_video(prompt, stop_data["title"], theme_desc)
+                if video_url:
+                    stops[i]["video_url"] = video_url
+                    update_journey_stops(journey_id, stops)
+                    logger.info(f"Journey {journey_id}: video {stop_num} saved")
+            except Exception as e:
+                logger.warning(f"Journey {journey_id}: Veo stop {stop_num} failed: {e}")
+
+        logger.info(f"Journey {journey_id}: FULLY COMPLETE (phase 2 done)")
 
     except Exception as e:
         logger.exception(f"Journey {journey_id} failed: {e}")
