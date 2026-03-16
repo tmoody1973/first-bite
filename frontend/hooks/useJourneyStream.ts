@@ -116,11 +116,18 @@ export function useJourneyStream() {
           }
 
           if (journey.status === "ready") {
-            if (pollingRef.current) clearInterval(pollingRef.current);
-            pollingRef.current = null;
             setStops(journeyStops.map(mapStop));
             setPosterUrl((journey.poster_url as string) || null);
-            setVideoUrl((journey.video_url as string) || null);
+            const vid = (journey.video_url as string) || null;
+            setVideoUrl(vid);
+
+            if (vid) {
+              // Video is ready — stop polling
+              if (pollingRef.current) clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            // Keep polling for video even after ready (Phase 2 enhancement)
+            // But mark as complete so user can browse
             setStatus("complete");
           } else if (journey.status === "error") {
             if (pollingRef.current) clearInterval(pollingRef.current);
