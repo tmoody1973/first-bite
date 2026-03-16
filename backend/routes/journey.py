@@ -56,9 +56,11 @@ Generate content for ONE stop on a food journey through {location}.
 This is Stop {stop_num} — "{theme_name}": {theme_desc}
 
 Write 1-2 SHORT paragraphs (max 150 words total) of raw, honest, sensory prose about this stop.
-Then generate an image of the street/market/kitchen scene.
+You MUST generate an image of the street/market/kitchen scene — this is REQUIRED.
 Then write 1 SHORT paragraph (max 50 words) introducing the signature dish.
-Then generate an image of the plated dish.
+You MUST generate an image of the plated dish — this is REQUIRED.
+
+IMPORTANT: EVERY stop MUST include exactly 2 images (one scene, one dish). No exceptions, even for reflective or final stops.
 
 After the narrative and images, include this EXACT format:
 
