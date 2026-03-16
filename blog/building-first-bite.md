@@ -106,7 +106,7 @@ The hackathon asks for "text, images, audio, and video in a single, fluid output
 
 **Audio: narration + ambient layers.** Gemini TTS provides the voice narration. ElevenLabs provides the ambient soundscape underneath. Two audio layers that work together — the narration tells the story, the ambient sound puts you in the space.
 
-**Video: cinematic summary.** Veo 3.1 generates an 8-second journey recap that plays behind the travel poster on the final slide. One video per journey, generated after the core experience is ready.
+**Video: cinematic summary.** Veo 3.1 generates an 8-second cinematic journey recap — a documentary-style montage capturing the atmosphere of all five stops. On the final slide, this video plays full-screen behind the vintage travel poster, creating a cinematic finale that feels like the closing credits of a food documentary. The prompt describes the specific locations and dishes from the journey, so the video is unique to each experience. Veo runs asynchronously after the core journey is ready — users start viewing immediately, and the video appears when they reach the last slide.
 
 **Creative director behavior.** The agent doesn't just generate content — it makes creative decisions. Which five stops to feature. What narrative arc to follow. Where to place images in the text. What history and cultural context to weave in. What ambient sound fits each scene. The prompting encodes a creative sensibility, not just a task description.
 
