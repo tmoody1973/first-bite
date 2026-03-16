@@ -43,48 +43,7 @@ Each journey follows a narrative arc:
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────┐
-│  Next.js 15 (Vercel)                         │
-│  Full-screen story flow with auto-advance    │
-│  Photo carousel, recipe cards, map modals    │
-│  Ambient audio + TTS narration playback      │
-└──────────┬───────────────────────────────────┘
-           │ REST polling (3s interval)
-           ▼
-┌──────────────────────────────────────────────┐
-│  Cloud Run (Python/FastAPI)                  │
-│                                              │
-│  Per-stop generation pipeline:               │
-│  ┌────────────────────────────────────────┐  │
-│  │ Gemini 3.1 Flash Image (Nano Banana 2)│  │
-│  │ → Interleaved text + AI images        │  │
-│  │ → Grounded with Google Search         │  │
-│  ├────────────────────────────────────────┤  │
-│  │ Google Places API (New)               │  │
-│  │ → Verify restaurant, get rating/photo │  │
-│  ├────────────────────────────────────────┤  │
-│  │ Street View Static API                │  │
-│  │ → Street-level imagery per stop       │  │
-│  ├────────────────────────────────────────┤  │
-│  │ ElevenLabs Sound Generation           │  │
-│  │ → Ambient environment audio per stop  │  │
-│  ├────────────────────────────────────────┤  │
-│  │ Gemini 2.5 Flash TTS                  │  │
-│  │ → Narrative voice narration per stop  │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│  Post-journey enhancements:                  │
-│  ┌────────────────────────────────────────┐  │
-│  │ Nano Banana 2 → Vintage travel poster │  │
-│  │ Veo 3.1 → Cinematic summary video    │  │
-│  │ Geocoding API → Dashboard map pin     │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│  Firestore → journey persistence             │
-│  Cloud Storage → images, audio, video        │
-└──────────────────────────────────────────────┘
-```
+![First Bite Architecture](docs/architecture.png)
 
 ---
 
