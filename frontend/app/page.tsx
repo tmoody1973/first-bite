@@ -1,14 +1,13 @@
 "use client";
 
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
-import { Hero } from "@/components/landing/Hero";
-import { SuggestionPills } from "@/components/landing/SuggestionPills";
+import { useUser } from "@clerk/nextjs";
+import { PosterLanding } from "@/components/landing/PosterLanding";
 import { StoryFlow } from "@/components/journey/StoryFlow";
 import { LoadingQuips } from "@/components/ui/LoadingQuips";
 import { useJourneyStream } from "@/hooks/useJourneyStream";
 
 export default function Home() {
-  const { user, isSignedIn } = useUser();
+  const { user } = useUser();
   const { stops, status, stopsGenerated, journeyId, error, posterUrl, videoUrl, startJourney } =
     useJourneyStream();
 
@@ -16,12 +15,12 @@ export default function Home() {
     startJourney(prompt, user?.id);
   };
 
-  // Initial loading — show first quip before any stops arrive
+  // Loading screen with progress
   if (status === "loading") {
     return <LoadingQuips stopsGenerated={stopsGenerated} />;
   }
 
-  // Cinematic mode — progressive reveal as stops arrive
+  // Cinematic mode or complete — show the journey
   if (status === "cinematic" || status === "complete") {
     return (
       <StoryFlow
@@ -35,38 +34,15 @@ export default function Home() {
     );
   }
 
+  // Landing page — vintage poster design
   return (
-    <main>
-      {/* Auth controls */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
-        {isSignedIn ? (
-          <>
-            <a
-              href="/dashboard"
-              className="font-sans text-xs text-[#E8E0D0]/40 hover:text-[#C4652A] transition-colors"
-            >
-              My Journeys
-            </a>
-            <UserButton
-              appearance={{ elements: { avatarBox: "w-8 h-8" } }}
-            />
-          </>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="font-sans text-xs px-4 py-2 rounded-full border border-[#E8E0D0]/10 text-[#E8E0D0]/50 hover:border-[#C4652A]/30 hover:text-[#C4652A] transition-colors">
-              Sign In
-            </button>
-          </SignInButton>
-        )}
-      </div>
-
-      <Hero onSubmit={handleSubmit} isLoading={false} />
+    <>
+      <PosterLanding onSubmit={handleSubmit} isLoading={false} />
       {error && (
-        <p className="text-center text-[#C4652A] font-sans text-sm mt-4">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-lg" style={{ background: "#C8432B", color: "#F5ECD7" }}>
           {error}
-        </p>
+        </div>
       )}
-      <SuggestionPills onSelect={handleSubmit} disabled={false} />
-    </main>
+    </>
   );
 }

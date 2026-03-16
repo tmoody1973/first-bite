@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Bite — The real story starts where the guidebook ends</title>
+<meta name="description" content="An AI-powered cultural food journey generator. Name a place, get a 5-stop multimedia travelogue with AI photography, recipes, narration, and a vintage travel poster.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --poster-navy:       #1B2A4A;
+  --poster-gold:       #D4A843;
+  --poster-cream:      #F5ECD7;
+  --poster-vermillion: #C8432B;
+  --poster-sky:        #6BA3BE;
+  --poster-forest:     #2D5F4A;
+  --poster-charcoal:   #2C2C2C;
+  --poster-warm-white: #FAF6ED;
+  --poster-rust:       #A0522D;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--poster-warm-white);
+  color: var(--poster-navy);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── Poster Frame ─────────────────────────────────────────── */
+.poster {
+  max-width: 780px;
+  margin: 2rem auto;
+  padding: 2rem;
+  position: relative;
+}
+
+.poster-inner {
+  border: 3px solid var(--poster-navy);
+  padding: 2.5rem 2.5rem 2rem;
+  position: relative;
+}
+
+.poster-inner::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--poster-gold);
+  pointer-events: none;
+}
+
+/* ─── Decorative Elements ──────────────────────────────────── */
+.deco-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.deco-bar::before,
+.deco-bar::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--poster-navy);
+  opacity: 0.3;
+}
+
+.deco-diamond {
+  width: 8px;
+  height: 8px;
+  background: var(--poster-gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.deco-sunburst {
+  text-align: center;
+  margin: 2rem 0;
+  color: var(--poster-gold);
+  font-size: 1.2rem;
+  letter-spacing: 0.5em;
+  opacity: 0.6;
+}
+
+@keyframes slowRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.deco-sunburst span {
+  display: inline-block;
+  animation: slowRotate 60s linear infinite;
+}
+
+/* ─── Typography ───────────────────────────────────────────── */
+.title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--poster-navy);
+  line-height: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.title-first { font-size: clamp(3rem, 10vw, 5.5rem); display: block; }
+.title-bite  { font-size: clamp(3.5rem, 12vw, 6.5rem); display: block; color: var(--poster-vermillion); }
+
+.tagline {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: var(--poster-rust);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.section-heading {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--poster-navy);
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Hero Photo ───────────────────────────────────────────── */
+.hero-frame {
+  position: relative;
+  margin: 1.5rem auto;
+  max-width: 600px;
+  border: 3px solid var(--poster-navy);
+  padding: 6px;
+}
+
+.hero-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--poster-gold);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  filter: sepia(15%) saturate(0.85) contrast(1.1) brightness(0.95);
+  mix-blend-mode: multiply;
+}
+
+.hero-caption {
+  text-align: center;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--poster-rust);
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+/* ─── Subheadline ──────────────────────────────────────────── */
+.subheadline {
+  text-align: center;
+  max-width: 520px;
+  margin: 1.5rem auto;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--poster-charcoal);
+}
+
+/* ─── Prompt Input (Telegram/Ticket Style) ─────────────────── */
+.prompt-area {
+  max-width: 520px;
+  margin: 2rem auto;
+}
+
+.prompt-form {
+  display: flex;
+  border: 2px solid var(--poster-navy);
+  background: var(--poster-cream);
+  overflow: hidden;
+}
+
+.prompt-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.9rem 1.2rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  color: var(--poster-navy);
+  outline: none;
+}
+
+.prompt-input::placeholder {
+  color: var(--poster-navy);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.prompt-btn {
+  background: var(--poster-gold);
+  color: var(--poster-navy);
+  border: none;
+  border-left: 2px dashed var(--poster-navy);
+  padding: 0.9rem 1.5rem;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.prompt-btn:hover {
+  background: var(--poster-navy);
+  color: var(--poster-gold);
+}
+
+.prompt-btn:focus-visible {
+  outline: 2px solid var(--poster-vermillion);
+  outline-offset: 2px;
+}
+
+/* ─── Suggestion Pills ─────────────────────────────────────── */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.2rem auto 0;
+  max-width: 520px;
+}
+
+.pill {
+  border: 1px solid var(--poster-navy);
+  background: var(--poster-cream);
+  color: var(--poster-navy);
+  padding: 0.35rem 0.8rem;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.pill:hover {
+  background: var(--poster-gold);
+  color: var(--poster-navy);
+  border-color: var(--poster-gold);
+}
+
+/* ─── Journey Itinerary ────────────────────────────────────── */
+.itinerary {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.stop {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+  align-items: baseline;
+}
+
+.stop-num {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--poster-vermillion);
+  flex-shrink: 0;
+  width: 2.5rem;
+  text-align: right;
+}
+
+.stop-content {}
+
+.stop-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--poster-navy);
+  margin-bottom: 0.15rem;
+}
+
+.stop-desc {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--poster-charcoal);
+  opacity: 0.8;
+}
+
+/* ─── Photo Gallery Strip ──────────────────────────────────── */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--poster-navy);
+}
+
+.gallery-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  filter: sepia(15%) saturate(0.85) contrast(1.1) brightness(0.95);
+  mix-blend-mode: multiply;
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.gallery-item:hover .gallery-img {
+  filter: sepia(0%) saturate(1) contrast(1.05) brightness(1);
+  transform: scale(1.03);
+}
+
+.gallery-caption {
+  text-align: center;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--poster-rust);
+  padding: 0.4rem 0;
+  background: var(--poster-cream);
+}
+
+/* ─── Features Grid ────────────────────────────────────────── */
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 2rem;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.feature {
+  font-size: 0.9rem;
+  color: var(--poster-charcoal);
+  padding-left: 1.2rem;
+  position: relative;
+}
+
+.feature::before {
+  content: '\u25C6';
+  position: absolute;
+  left: 0;
+  color: var(--poster-gold);
+  font-size: 0.6rem;
+  top: 0.35rem;
+}
+
+/* ─── Finale Block ─────────────────────────────────────────── */
+.finale {
+  background: linear-gradient(135deg, rgba(212,168,67,0.08), rgba(212,168,67,0.15));
+  border: 1px solid var(--poster-gold);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  margin: 1.5rem 0;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--poster-charcoal);
+}
+
+/* ─── Powered By ───────────────────────────────────────────── */
+.powered {
+  text-align: center;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--poster-navy);
+  opacity: 0.5;
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* ─── Bottom Credits ───────────────────────────────────────── */
+.credits {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(27,42,74,0.2);
+  margin-top: 1rem;
+}
+
+.credits p {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--poster-navy);
+  opacity: 0.4;
+  margin-bottom: 0.3rem;
+}
+
+.disclaimer {
+  text-align: center;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: var(--poster-charcoal);
+  opacity: 0.4;
+  margin-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* ─── Animations ───────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.title-first { animation: fadeSlideUp 0.7s 0.3s both; }
+.title-bite  { animation: fadeSlideUp 0.7s 0.5s both; }
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .title-first, .title-bite { animation: none; opacity: 1; transform: none; }
+  .deco-sunburst span { animation: none; }
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .poster { margin: 0.5rem; padding: 0.75rem; }
+  .poster-inner { padding: 1.5rem 1.2rem 1.2rem; }
+  .hero-img { height: 250px; }
+  .gallery { grid-template-columns: 1fr 1fr; }
+  .features { grid-template-columns: 1fr; }
+  .prompt-form { flex-direction: column; }
+  .prompt-btn { border-left: none; border-top: 2px dashed var(--poster-navy); }
+  .pills { gap: 0.4rem; }
+}
+
+/* ─── Print ────────────────────────────────────────────────── */
+@media print {
+  body::before { display: none; }
+  .reveal { opacity: 1; transform: none; }
+  .prompt-area, .pills { display: none; }
+}
+</style>
+</head>
+<body>
+
+<main class="poster" role="main">
+  <div class="poster-inner">
+
+    <!-- Top decorative bar -->
+    <div class="deco-bar"><div class="deco-diamond"></div></div>
+
+    <!-- Brand mark -->
+    <h1 class="title">
+      <span class="title-first">First</span>
+      <span class="title-bite">Bite</span>
+    </h1>
+
+    <!-- Tagline -->
+    <p class="tagline">The real story starts where the guidebook ends.</p>
+
+    <!-- Art Deco divider -->
+    <div class="deco-sunburst"><span>&#x2737;</span></div>
+
+    <!-- Hero photo -->
+    <div class="hero-frame reveal">
+      <img
+        class="hero-img"
+        src="images/selena-jimenez-rltaNQ1m7XI-unsplash.jpg"
+        alt="Crowds gather at a vibrant red-and-white street food stall in Sao Paulo, Brazil"
+        loading="eager"
+      >
+    </div>
+    <p class="hero-caption reveal">Sao Paulo, Brasil</p>
+
+    <!-- Subheadline -->
+    <p class="subheadline reveal">
+      Name a place and we'll take you on a 5-stop food journey &mdash;
+      AI-generated photography, real restaurant recommendations,
+      home-cookable recipes, narrated storytelling, ambient soundscapes,
+      and a vintage travel poster. All from one prompt.
+    </p>
+
+    <!-- Prompt input -->
+    <div class="prompt-area reveal">
+      <form class="prompt-form" onsubmit="event.preventDefault(); window.location.href='https://first-bite.vercel.app';">
+        <label for="prompt-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Enter a destination</label>
+        <input
+          id="prompt-input"
+          class="prompt-input"
+          type="text"
+          placeholder="Name a place. I'll find the food."
+          autocomplete="off"
+        >
+        <button class="prompt-btn" type="submit">Bon Voyage &rarr;</button>
+      </form>
+
+      <!-- Suggestion pills -->
+      <div class="pills">
+        <a class="pill" href="https://first-bite.vercel.app">Night markets of Bangkok</a>
+        <a class="pill" href="https://first-bite.vercel.app">Tacos in Oaxaca</a>
+        <a class="pill" href="https://first-bite.vercel.app">Street food in Lagos</a>
+        <a class="pill" href="https://first-bite.vercel.app">Ramen alleys of Tokyo</a>
+        <a class="pill" href="https://first-bite.vercel.app">Hawker centres of Singapore</a>
+        <a class="pill" href="https://first-bite.vercel.app">Bistros of Lyon</a>
+      </div>
+    </div>
+
+    <!-- Art Deco divider -->
+    <div class="deco-bar"><div class="deco-diamond"></div></div>
+
+    <!-- Journey section -->
+    <p class="section-heading reveal">What happens when you hit go</p>
+
+    <div class="itinerary reveal">
+      <div class="stop">
+        <div class="stop-num">I</div>
+        <div class="stop-content">
+          <div class="stop-title">The Arrival</div>
+          <div class="stop-desc">First impression, chaos, the smell</div>
+        </div>
+      </div>
+      <div class="stop">
+        <div class="stop-num">II</div>
+        <div class="stop-content">
+          <div class="stop-title">The Street</div>
+          <div class="stop-desc">The stall nobody talks about</div>
+        </div>
+      </div>
+      <div class="stop">
+        <div class="stop-num">III</div>
+        <div class="stop-content">
+          <div class="stop-title">The Kitchen</div>
+          <div class="stop-desc">Behind the counter, the technique</div>
+        </div>
+      </div>
+      <div class="stop">
+        <div class="stop-num">IV</div>
+        <div class="stop-content">
+          <div class="stop-title">The Table</div>
+          <div class="stop-desc">Strangers sharing food and stories</div>
+        </div>
+      </div>
+      <div class="stop">
+        <div class="stop-num">V</div>
+        <div class="stop-content">
+          <div class="stop-title">The Last Bite</div>
+          <div class="stop-desc">What this place taught you</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art Deco divider -->
+    <div class="deco-sunburst"><span>&#x2737;</span></div>
+
+    <!-- Photo gallery strip -->
+    <div class="gallery reveal">
+      <div class="gallery-item">
+        <img class="gallery-img" src="images/tunde-buremo-cnVn4Gg4b00-unsplash.jpg" alt="A vendor arranges fresh tomatoes and peppers at an open-air market in Lagos, Nigeria" loading="lazy">
+        <div class="gallery-caption">Lagos</div>
+      </div>
+      <div class="gallery-item">
+        <img class="gallery-img" src="images/ben-iwara-KFO2m5Ms1Pc-unsplash.jpg" alt="A woman selects grilled plantains at a roadside food stand in Cameroon" loading="lazy">
+        <div class="gallery-caption">Cameroun</div>
+      </div>
+      <div class="gallery-item">
+        <img class="gallery-img" src="images/george-dagerotip-GJU-Oqe8OAc-unsplash.jpg" alt="Fried snacks and dipping sauces served from a street food cart in Southeast Asia" loading="lazy">
+        <div class="gallery-caption">Bangkok</div>
+      </div>
+      <div class="gallery-item">
+        <img class="gallery-img" src="images/wkndr-V9YD8obUvUc-unsplash.jpg" alt="Patrons crowd a glowing ramen yatai stall on a nighttime street in Fukuoka, Japan" loading="lazy">
+        <div class="gallery-caption">Fukuoka</div>
+      </div>
+    </div>
+
+    <!-- Features grid -->
+    <p class="section-heading reveal">Each stop includes</p>
+
+    <div class="features reveal">
+      <div class="feature">AI-generated scene photography</div>
+      <div class="feature">Home-cookable recipe cards</div>
+      <div class="feature">AI-generated dish photography</div>
+      <div class="feature">Narrated storytelling</div>
+      <div class="feature">Real restaurant data via Google Places</div>
+      <div class="feature">Ambient soundscapes</div>
+      <div class="feature">Street View imagery</div>
+      <div class="feature">Map integration</div>
+    </div>
+
+    <!-- Finale block -->
+    <div class="finale reveal">
+      At the end of your journey: a vintage travel poster featuring all five dishes,
+      a cinematic summary video, and a shareable link to relive it all.
+    </div>
+
+    <!-- Powered by -->
+    <p class="powered">Gemini 3.1 &middot; Veo &middot; Google Places &middot; ElevenLabs &middot; Google Cloud</p>
+
+    <!-- Bottom credits -->
+    <div class="credits">
+      <p>MMXXVI &middot; Gemini Live Agent Challenge</p>
+      <p>Built by Tarik Moody</p>
+      <p style="font-size: 0.4rem; opacity: 0.3;">Photos: Unsplash &mdash; S. Jimenez, T. Buremo, B. Iwara, G. Dagerotip, Wkndr</p>
+    </div>
+
+  </div><!-- .poster-inner -->
+</main>
+
+<p class="disclaimer">All places and restaurants are AI-suggested. Verify details before visiting.</p>
+
+<script>
+// Intersection Observer for scroll reveals
+document.addEventListener('DOMContentLoaded', () => {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReduced) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+});
+</script>
+
+</body>
+</html>
