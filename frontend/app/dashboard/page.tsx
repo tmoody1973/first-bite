@@ -35,10 +35,17 @@ export default function DashboardPage() {
   // Build Google Maps Static API URL with all journey pins
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
   const journeysWithCoords = journeys.filter((j) => j.lat && j.lng);
-  const mapUrl =
-    mapsKey && journeysWithCoords.length > 0
-      ? `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e${journeysWithCoords.map((j, i) => `&markers=color:0xC4652A|label:${i + 1}|${j.lat},${j.lng}`).join("")}&key=${mapsKey}`
-      : null;
+
+  // Show map with pins if we have coordinates, or a world overview if we have journeys but no coords yet
+  let mapUrl: string | null = null;
+  if (mapsKey && journeys.length > 0) {
+    if (journeysWithCoords.length > 0) {
+      mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e${journeysWithCoords.map((j, i) => `&markers=color:0xC4652A|label:${i + 1}|${j.lat},${j.lng}`).join("")}&key=${mapsKey}`;
+    } else {
+      // No coords yet — show a world overview map
+      mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&center=20,0&zoom=1&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e&key=${mapsKey}`;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-6 py-8">
