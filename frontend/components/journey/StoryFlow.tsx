@@ -47,7 +47,7 @@ export function StoryFlow({
           }
           return prev;
         });
-      }, 15000); // 15 seconds per slide
+      }, 45000); // 45 seconds per slide — enough for narration to finish
     }
 
     // During cinematic mode, show latest stop

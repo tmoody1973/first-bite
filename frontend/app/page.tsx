@@ -9,7 +9,7 @@ import { useJourneyStream } from "@/hooks/useJourneyStream";
 
 export default function Home() {
   const { user, isSignedIn } = useUser();
-  const { stops, status, journeyId, error, posterUrl, videoUrl, startJourney } =
+  const { stops, status, stopsGenerated, journeyId, error, posterUrl, videoUrl, startJourney } =
     useJourneyStream();
 
   const handleSubmit = (prompt: string) => {
@@ -18,7 +18,7 @@ export default function Home() {
 
   // Initial loading — show first quip before any stops arrive
   if (status === "loading") {
-    return <LoadingQuips stopsGenerated={0} />;
+    return <LoadingQuips stopsGenerated={stopsGenerated} />;
   }
 
   // Cinematic mode — progressive reveal as stops arrive

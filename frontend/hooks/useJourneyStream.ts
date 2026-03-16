@@ -69,6 +69,7 @@ export function useJourneyStream() {
   const [error, setError] = useState<string | null>(null);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [stopsGenerated, setStopsGenerated] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevStopCountRef = useRef(0);
 
@@ -111,6 +112,9 @@ export function useJourneyStream() {
           const journey = await pollRes.json();
           const journeyStops = (journey.stops || []) as Record<string, unknown>[];
 
+          // Update progress counter so loading screen shows progress
+          setStopsGenerated(journeyStops.length);
+
           // Wait for 4 stops before revealing (smoother experience)
           if (journeyStops.length >= 4) {
             setStatus("cinematic");
@@ -147,5 +151,5 @@ export function useJourneyStream() {
     }
   }, []);
 
-  return { stops, status, journeyId, error, posterUrl, videoUrl, startJourney };
+  return { stops, status, stopsGenerated, journeyId, error, posterUrl, videoUrl, startJourney };
 }
