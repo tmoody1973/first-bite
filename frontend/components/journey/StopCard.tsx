@@ -56,7 +56,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
   }, [stop.ambientUrl, stop.stopNumber]);
 
   return (
-    <div className="relative h-screen w-screen overflow-y-auto">
+    <div className="relative h-screen w-screen overflow-y-auto" style={{ color: "#E8E0D0" }}>
       {/* Background: video if available, else scene image */}
       {stop.videoUrl ? (
         <div className="absolute inset-0">
@@ -68,7 +68,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
             playsInline
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-[#0A0A0A]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-[#0A0A0A]/50" />
         </div>
       ) : stop.sceneImageUrl ? (
         <div className="absolute inset-0">
@@ -77,7 +77,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
             alt={`Scene at ${stop.title}`}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-[#0A0A0A]/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-[#0A0A0A]/50" />
         </div>
       ) : (
         <div className="absolute inset-0 bg-[#0A0A0A]" />
@@ -101,7 +101,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-6"
+          className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-6 text-white"
         >
           {stop.title}
         </motion.h2>

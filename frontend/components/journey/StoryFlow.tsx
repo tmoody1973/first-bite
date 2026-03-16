@@ -29,9 +29,12 @@ export function StoryFlow({
   // Each stop plays for ~15 seconds, then advances to next
   const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const hasStartedAutoAdvance = useRef(false);
+
   useEffect(() => {
-    // Start auto-advance once we have stops and status is complete
-    if (status === "complete" && stops.length > 0 && !autoAdvanceRef.current) {
+    // When generation completes, ALWAYS start from stop 1
+    if (status === "complete" && stops.length > 0 && !hasStartedAutoAdvance.current) {
+      hasStartedAutoAdvance.current = true;
       setCurrentIndex(0); // Start from beginning
 
       autoAdvanceRef.current = setInterval(() => {
@@ -40,19 +43,13 @@ export function StoryFlow({
           if (prev < total - 1) {
             return prev + 1;
           }
-          // Reached the end — stop auto-advancing
           if (autoAdvanceRef.current) {
             clearInterval(autoAdvanceRef.current);
             autoAdvanceRef.current = null;
           }
           return prev;
         });
-      }, 45000); // 45 seconds per slide — enough for narration to finish
-    }
-
-    // During cinematic mode, show latest stop
-    if (isGenerating && stops.length > 0) {
-      setCurrentIndex(stops.length - 1);
+      }, 45000);
     }
 
     return () => {
@@ -61,7 +58,14 @@ export function StoryFlow({
         autoAdvanceRef.current = null;
       }
     };
-  }, [status, stops.length, isGenerating, posterUrl]);
+  }, [status, stops.length, posterUrl]);
+
+  // During cinematic mode only, show latest stop
+  useEffect(() => {
+    if (isGenerating && stops.length > 0 && !hasStartedAutoAdvance.current) {
+      setCurrentIndex(stops.length - 1);
+    }
+  }, [isGenerating, stops.length]);
 
   if (stops.length === 0) return null;
 
