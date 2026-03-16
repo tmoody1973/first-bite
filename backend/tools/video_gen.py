@@ -32,7 +32,7 @@ def generate_stop_video(location: str, stop_title: str, theme: str) -> str:
                 "number_of_videos": 1,
                 "duration_seconds": 4,
                 "aspect_ratio": "16:9",
-                "person_generation": "dont_allow",
+                "person_generation": "allow_adult",
             },
         )
 
