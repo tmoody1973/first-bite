@@ -59,20 +59,22 @@ def get_journey(journey_id: str) -> dict | None:
 def list_journeys_by_user(user_id: str) -> list[dict]:
     """List all journeys for a user, newest first."""
     db = _get_db()
+    # Simple query — filter by user_id only, sort/filter in Python to avoid composite index
     docs = (
         db.collection("journeys")
         .where("user_id", "==", user_id)
-        .where("status", "==", "ready")
-        .order_by("created_at", direction=firestore.Query.DESCENDING)
-        .limit(20)
+        .limit(50)
         .stream()
     )
     results = []
     for doc in docs:
         data = doc.to_dict()
         data["id"] = doc.id
-        results.append(data)
-    return results
+        if data.get("status") == "ready":
+            results.append(data)
+    # Sort by created_at descending
+    results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return results[:20]
 
 
 def delete_journey(journey_id: str, user_id: str) -> bool:

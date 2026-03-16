@@ -84,10 +84,20 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
               <p className="font-serif italic text-lg text-[#E8E0D0]/60 mb-4">
                 Your journey, captured.
               </p>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-3 justify-center flex-wrap">
+                <button
+                  onClick={() => {
+                    const shareUrl = `${window.location.origin}/journey/${journeyId}`;
+                    navigator.clipboard.writeText(shareUrl);
+                    alert("Share link copied!");
+                  }}
+                  className="font-sans text-xs px-5 py-2.5 rounded-full bg-[#C4652A] text-white hover:bg-[#C4652A]/80 transition-colors"
+                >
+                  Share Journey
+                </button>
                 <a
                   href="/"
-                  className="font-sans text-xs px-5 py-2.5 rounded-full bg-[#C4652A] text-white hover:bg-[#C4652A]/80 transition-colors"
+                  className="font-sans text-xs px-5 py-2.5 rounded-full border border-[#E8E0D0]/10 text-[#E8E0D0]/50 hover:border-[#C4652A]/30 hover:text-[#C4652A] transition-colors"
                 >
                   New Journey
                 </a>

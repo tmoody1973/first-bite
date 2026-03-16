@@ -171,19 +171,39 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
     }
 
 
-def _generate_travel_poster(client, prompt: str) -> str:
-    """Generate a Nano Banana travel poster for the journey."""
+def _generate_travel_poster(client, prompt: str, stops: list[dict]) -> str:
+    """Generate a vintage French-style travel poster with all journey details."""
+    # Build details from stops
+    dishes = []
+    places = []
+    for s in stops:
+        if s.get("recipe"):
+            dishes.append(s["recipe"].get("dish_name", ""))
+        if s.get("place"):
+            places.append(s["place"].get("name", ""))
+
+    dishes_text = ", ".join(d for d in dishes if d)
+    places_text = ", ".join(p for p in places if p)
+
     try:
         response = client.models.generate_content(
             model=STORYTELLER_MODEL,
             contents=[{
                 "role": "user",
                 "parts": [{
-                    "text": f"Generate a vintage-style travel poster for: {prompt}. "
-                    f"Style: retro mid-century travel poster with bold typography, "
-                    f"warm saturated colors, iconic food imagery from the region, "
-                    f"and the text 'FIRST BITE' at the bottom. Painterly, editorial, "
-                    f"like a 1960s airline poster but for food tourism."
+                    "text": f"Generate a vintage French lithograph travel poster for: {prompt}. "
+                    f"Style: classic 1920s-1950s French travel poster (like PLM railway posters, "
+                    f"Cassandre, Roger Broders). Bold Art Deco typography, rich saturated gouache colors, "
+                    f"dramatic perspective, elegant hand-lettered text. "
+                    f"The poster MUST include: "
+                    f"- Large title text of the destination at top "
+                    f"- Iconic food imagery from the region painted in the scene "
+                    f"- The dishes: {dishes_text} — show them illustrated in the poster "
+                    f"- The restaurants/stalls: {places_text} — include their names as small text "
+                    f"- 'FIRST BITE' in elegant typography at the bottom "
+                    f"- A tagline: 'The real story starts where the guidebook ends' in small italic text "
+                    f"Think: vintage Air France poster meets food tourism. Painterly, not photographic. "
+                    f"Rich warm palette — burnt sienna, ochre, deep teal, cream."
                 }]
             }],
             config={"response_modalities": ["IMAGE"]},
@@ -222,7 +242,7 @@ def generate_journey_background(journey_id: str, prompt: str):
 
         # Generate travel poster (like Sonic Sommelier's share image)
         logger.info(f"Journey {journey_id}: generating travel poster...")
-        poster_url = _generate_travel_poster(client, prompt)
+        poster_url = _generate_travel_poster(client, prompt, stops)
         if poster_url:
             update_journey_poster(journey_id, poster_url)
             logger.info(f"Journey {journey_id}: poster saved")
@@ -282,6 +302,22 @@ async def list_user_journeys(user_id: str):
         }
         for j in journeys
     ]
+
+
+@router.get("/api/journey/{journey_id}/share")
+async def get_share_data(journey_id: str):
+    """Public endpoint — returns journey data for sharing (no auth required)."""
+    journey = get_journey(journey_id)
+    if not journey or journey.get("status") != "ready":
+        return JSONResponse(
+            status_code=404, content={"error": "Journey not found"}
+        )
+    return {
+        "id": journey["id"],
+        "prompt": journey.get("prompt", ""),
+        "poster_url": journey.get("poster_url", ""),
+        "stops": journey.get("stops", []),
+    }
 
 
 @router.delete("/api/journey/{journey_id}")
