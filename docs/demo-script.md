@@ -1,101 +1,123 @@
-# First Bite — Demo Video Script (3:30)
+# First Bite — Demo Video Script (3:45)
 
-> Voiceover for Kite.video. Screen recording of the app throughout.
-> Tone: raw, honest, direct. No hype. Let the work speak.
+> Voiceover for Kite.video. Real-time screen recording — no mockups.
+> Must show: multimodal/agentic features working live + problem/solution pitch.
 
 ---
 
-## SCENE 1: THE HOOK (0:00–0:25)
+## SCENE 1: THE PROBLEM (0:00–0:30)
 
-**SCREEN:** Black. Then the landing page loads — vintage map background, "FIRST BITE" in Art Deco type.
+**SCREEN:** Quick montage — generic food blog screenshots, AI chatbot text responses, stock photos of food. Then cut to black.
 
 **VO:**
-"Most AI apps give you text. Maybe an image if you're lucky. First Bite gives you a food documentary. You type one sentence — 'street food in Lagos' — and an AI agent builds you a five-stop immersive journey. Photography. Recipes. Real restaurants. Voice narration. Ambient sound. A cinematic video. A travel poster. Eight modalities. One prompt. Let me show you."
+"Every city on earth has a food story worth telling. But right now, if you want to explore the food culture of a place before you go, your options are food blogs full of stock photos and SEO filler, or an AI chatbot that gives you a wall of text. No one is building what food travel actually feels like — the sound of a market, the view from the street, the recipe your grandmother would recognize, the history behind why this dish exists in this neighborhood and not that one. That's the problem First Bite solves."
 
 ---
 
-## SCENE 2: THE PROMPT (0:25–0:45)
+## SCENE 2: THE PITCH (0:30–0:50)
 
-**SCREEN:** Type "Street food in Lagos" into the input. Click "Bon Voyage." Loading screen appears — stops checking off one by one.
+**SCREEN:** First Bite landing page loads — vintage map background, Art Deco typography, photo gallery.
 
 **VO:**
-"I type a place. That's it. Behind the scenes, Gemini 3.1 Flash generates interleaved text and images in a single API call — not separate requests stitched together. The model decides where the photos belong in the narrative. Google Search grounding verifies the restaurants are real. Google Places pulls ratings and actual photos. Street View grabs the view from the sidewalk. ElevenLabs builds the ambient soundscape. Gemini TTS records the narration. All of it saves to Firestore as each stop completes."
+"First Bite is an AI-powered creative storytelling agent. You give it one sentence — a place, a cuisine, a craving — and it builds you a complete immersive food journey. Not a list. Not a blog post. A full multimedia experience with eight modalities generated from a single prompt. Let me show you this working live, right now."
 
 ---
 
-## SCENE 3: THE ARRIVAL (0:45–1:15)
+## SCENE 3: LIVE DEMO — THE PROMPT (0:50–1:10)
 
-**SCREEN:** Stop 1 appears — full-screen scene image as background, narrative text overlaid, photo carousel cycling through AI image / Street View / real Google Places photo.
+**SCREEN:** Type "Street food in Lagos" into the input field. Click "Bon Voyage." Loading screen appears with pipeline steps checking off in real time — Stop 1 generating, Stop 2 generating...
 
 **VO:**
-"Stop one. The Arrival. The AI didn't just describe Lagos — it told me about the history of this market, who built it, what happened in this neighborhood forty years ago. The photo carousel shows three views: the AI-generated scene, the actual Google Street View, and a real photo pulled from Google Places. That ambient sound you hear — the crowd, the sizzling oil, the vendor calling out — that's ElevenLabs generating a soundscape specific to this stop. Under the narration. At fifteen percent volume. You feel it more than you hear it."
+"I'm typing 'street food in Lagos.' This is live — no pre-recorded footage, no mockups. When I hit go, a Gemini agent starts composing. Each stop is a single API call with interleaved output — Gemini generates the narrative text and AI photography together in one response. Not separate calls stitched together. The model decides where images belong in the story. You can see each stop completing — that's Google Places verifying restaurants, Street View grabbing location imagery, Gemini TTS recording narration, ElevenLabs generating ambient sound. All happening per stop."
 
 ---
 
-## SCENE 4: THE RECIPE (1:15–1:45)
+## SCENE 4: LIVE DEMO — THE EXPERIENCE (1:10–1:50)
 
-**SCREEN:** Tap the dish thumbnail. Recipe card slides up — two-column layout, Nano Banana dish photo, ingredients with measurements, numbered steps. Tap "Save" to download as PNG.
+> **JUDGING TARGET: "Does it break the text box paradigm? See, Hear, Speak? Distinct persona/voice? Live and context-aware?"**
+
+**SCREEN:** Journey reveals — full-screen Stop 1 with scene image as background, narrative text, ambient sound playing, TTS narration auto-playing. Photo carousel cycles: AI image → Street View → real Google Places photo. Navigate through stops 2 and 3.
 
 **VO:**
-"Every stop has a recipe. Not a restaurant menu — a home-cookable recipe with real measurements and real steps. The dish photo is AI-generated by Nano Banana 2. The recipe card downloads as a PNG. And the recipe description isn't just 'here's what you need' — it tells you where this dish came from. What trade routes brought these ingredients here. Why this neighborhood cooks it this way and not that way. History woven into the food."
+"No text box. No chat interface. This is a full-screen immersive experience — you see it, you hear it, you feel it. The narrator has a distinct voice — the Charon voice from Gemini TTS, low and measured. The ambient sound underneath changes per stop — right now that's a Lagos market. ElevenLabs generated it from a text description of this specific scene. The photo carousel rotates between the AI-generated scene, the actual Google Street View, and a real photo from Google Places with the restaurant's rating. Three views of the same place. The whole experience auto-advances like a documentary — context-aware, not turn-based. The agent composed this as a continuous story, not a series of disconnected answers."
 
 ---
 
-## SCENE 5: THE PLACE (1:45–2:05)
+## SCENE 5: LIVE DEMO — THE RECIPE (1:50–2:15)
 
-**SCREEN:** Show the place card with rating. Tap "View on Map." Google Maps modal opens showing the restaurant location.
+**SCREEN:** Tap the dish thumbnail on a stop. Recipe card slides up — two-column layout with Nano Banana dish photo, ingredients, numbered steps. Tap "Save" — PNG downloads.
 
 **VO:**
-"Every restaurant recommendation is verified through Google Places. Real name, real address, real rating. Tap it and you're looking at the location on Google Maps. The agent doesn't invent places — grounding with Google Search keeps it honest. If a restaurant doesn't exist, it doesn't make the cut."
+"Every stop has a full recipe. Home-cookable — real ingredients, real measurements, real steps. The dish photo is generated by Nano Banana 2. But the recipe description isn't just instructions — it tells you the origin of this dish. What colonial history shaped it. What the ingredients say about the region's agriculture. Tap save and you get a downloadable recipe card as a PNG. This is something you actually take home and cook."
 
 ---
 
-## SCENE 6: THE FINALE (2:05–2:35)
+## SCENE 6: LIVE DEMO — THE PLACE (2:15–2:30)
 
-**SCREEN:** Navigate to the last slide. Veo video plays full-screen behind the vintage travel poster. Poster shows all five dishes and restaurant names in Art Deco style.
+> **JUDGING TARGET: "Does the agent avoid hallucinations? Evidence of grounding?"**
+
+**SCREEN:** Show place card with verified rating. Tap "View on Map." Google Maps modal opens.
 
 **VO:**
-"The last slide. Veo 3.1 generated an eight-second cinematic video — a documentary-style montage of the journey. It plays full-screen behind a vintage French travel poster that Nano Banana composed with every dish and every restaurant from all five stops. You can download the poster. Share the journey with a link. Anyone with that link sees the full experience — no account needed."
+"Every restaurant is verified through Google Places — real name, real address, real rating pulled from Google's data. The agent runs with Google Search grounding enabled on every Gemini call, so the historical facts and restaurant recommendations are checked against live search results. This rating, this address — that's not the AI guessing. That's Google Places confirming it. Zero hallucination by design."
 
 ---
 
-## SCENE 7: THE DASHBOARD (2:35–2:55)
+## SCENE 7: LIVE DEMO — THE FINALE (2:30–2:55)
 
-**SCREEN:** Navigate to the dashboard. Show the journey gallery with poster thumbnails. Show the world map with pins.
+**SCREEN:** Navigate to the final slide. Veo video plays full-screen behind the vintage French travel poster. Show the poster with all five dishes and restaurant names.
 
 **VO:**
-"Your dashboard. Every journey saved. A world map that grows with each trip. The posters work as gallery cards — you see your collection of food journeys laid out like stamps in a passport. Tap any one and you're back in the full experience with narration and ambient sound."
+"The last slide. That video playing behind the poster — Veo 3.1 generated that. An eight-second cinematic recap of the entire journey, unique to this specific trip. The poster itself is Nano Banana — a vintage French lithograph style with every dish and every restaurant from all five stops. You can download it. Share the whole journey with a link — anyone can view it, no account needed."
 
 ---
 
-## SCENE 8: THE ARCHITECTURE (2:55–3:15)
+## SCENE 8: LIVE DEMO — THE DASHBOARD (2:55–3:10)
 
-**SCREEN:** Show the architecture diagram from the README (or a clean version). Highlight: Gemini interleaved → Places → Street View → ElevenLabs → TTS → Veo → Firestore → Cloud Run.
+**SCREEN:** Navigate to dashboard. Show journey gallery with poster thumbnails. Show world map with pins.
 
 **VO:**
-"Under the hood. One Python backend on Cloud Run. Gemini 3.1 Flash for interleaved text and images. Gemini 3.1 Pro as the orchestrator. Gemini TTS for narration. Veo for video. Google Places, Street View, and Geocoding for real-world data. ElevenLabs for ambient sound. Firestore for persistence. Cloud Storage for media. Google Search grounding to keep it honest. All of it from one prompt, assembled into one experience."
+"Your dashboard. Every journey saved with its poster as the card. A world map that grows with each trip — geocoded from the original prompt. Sign in with Clerk and your collection builds over time. Tap any journey and you're back in the full experience."
 
 ---
 
-## SCENE 9: THE CLOSE (3:15–3:30)
+## SCENE 9: ARCHITECTURE + CLOUD PROOF (3:10–3:30)
 
-**SCREEN:** Back to the landing page. The vintage map glows behind the poster frame.
+> **JUDGING TARGET: "GenAI SDK utilization? Robustly hosted on Google Cloud? Architecture diagram clear? Visual proof of Cloud deployment?"**
+
+**SCREEN:** Architecture diagram. Then quick flash of Cloud Run console showing the deployed service, Firestore with journey documents, Cloud Storage bucket with images/audio/video.
 
 **VO:**
-"First Bite. One sentence. Eight modalities. A food journey worth taking. The real story starts where the guidebook ends."
-
-**SCREEN:** URL appears: `first-bite.vercel.app`
-**TEXT ON SCREEN:** `Built for the Gemini Live Agent Challenge · #GeminiLiveAgentChallenge`
+"The architecture. Python backend on Cloud Run — you're looking at the live service right now. Four Gemini models through the GenAI SDK: 3.1 Flash for interleaved output, 3.1 Pro as orchestrator, 2.5 Flash TTS for narration, Veo 3.1 for video. Google Search grounding on every call. Google Places, Street View, and Geocoding for real-world data. ElevenLabs for ambient sound. Firestore for progressive journey persistence — each stop saves as it generates. Cloud Storage for all media. The deploy script is in the repo. One command and the whole stack stands up."
 
 ---
 
-## PRODUCTION NOTES FOR KITE.VIDEO
+## SCENE 10: THE CLOSE (3:30–3:45)
 
-- **Total runtime:** 3:30 (under the 4-minute limit)
-- **Screen recording:** Record at 1920x1080, 60fps, dark mode throughout
-- **Voiceover tone:** Low energy, measured pace. Not excited. Confident. Like explaining something you built to someone you respect.
-- **Music:** None needed — the app's own ambient sound and narration provide the audio texture during the demo. If Kite needs background, use something minimal and warm.
-- **Transitions:** Simple crossfades between scenes. No flashy motion graphics. The app IS the visual.
-- **Pre-generate a journey** before recording so you don't wait during the demo. Use "Street food in Lagos" — it produces strong visuals and diverse stops.
-- **Show the Veo video playing** — this is the moment that separates this from every other submission. Make sure it loaded before you record.
-- **Consider generating a Veo video separately** as a B-roll clip to use during the architecture section — a 4-second ambient shot of a market or kitchen. Prompt: "Cinematic 4-second B-roll of a bustling street food market at night, warm lighting, documentary style"
+**SCREEN:** Back to landing page. URL appears large: `first-bite.vercel.app`
+
+**VO:**
+"First Bite turns one sentence into a food journey you can see, hear, cook from, and share. The real story starts where the guidebook ends."
+
+**TEXT ON SCREEN:**
+```
+first-bite.vercel.app
+github.com/tmoody1973/first-bite
+
+Built for the Gemini Live Agent Challenge
+#GeminiLiveAgentChallenge
+```
+
+---
+
+## PRODUCTION NOTES
+
+- **Total runtime:** 3:45 (under 4-minute limit)
+- **THIS MUST BE LIVE.** Judges want "multimodal/agentic features working in real-time (no mockups)." Pre-generate one journey before recording so stops load fast, but show the loading screen with pipeline steps to prove it's real processing. The loading screen with checkmarks IS the proof of real-time generation.
+- **Screen record at 1920x1080, 60fps**
+- **Voiceover tone:** Confident, measured, not excited. You're showing work you respect, not pitching a product.
+- **Keep the app's audio audible** — ambient sounds and TTS narration should be faintly heard under the voiceover during scenes 4-7. This proves the audio features work.
+- **No background music** — the app provides its own audio texture.
+- **Transitions:** Simple crossfades. The app is the visual.
+- **The Veo video playing behind the poster** is the moment that separates this from every other submission. Make sure it loaded.
+- **Consider a second take** where you generate a DIFFERENT journey ("Ramen alleys of Tokyo") to show it's not a single pre-baked demo.
