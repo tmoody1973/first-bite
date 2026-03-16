@@ -69,25 +69,25 @@ export function LoadingQuips({ stopsGenerated }: LoadingQuipsProps) {
   return (
     <div className="fixed inset-0 bg-[#0A0A0A] flex flex-col items-center justify-center px-6 overflow-hidden">
 
-      {/* Floating ambient images — drift in and fade out behind the content */}
+      {/* Visible photo collage spread around the pipeline steps */}
       <AnimatePresence mode="popLayout">
         {visibleImages.map((imgIdx, i) => {
           const pos = POSITIONS[(imgIdx + i * 3) % POSITIONS.length];
           return (
             <motion.div
               key={`float-${imgIdx}-${i}-${Math.floor(Date.now() / 2500)}`}
-              initial={{ opacity: 0, scale: 0.85, y: 20 }}
-              animate={{ opacity: 0.15, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 1.05, y: -10 }}
-              transition={{ duration: 2, ease: "easeInOut" }}
-              className="absolute pointer-events-none hidden md:block"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 0.85, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute pointer-events-none"
               style={{
                 top: pos.top,
                 left: pos.left,
                 right: pos.right,
                 bottom: pos.bottom,
-                width: "clamp(120px, 15vw, 200px)",
-                height: "clamp(120px, 15vw, 200px)",
+                width: "clamp(90px, 14vw, 180px)",
+                height: "clamp(90px, 14vw, 180px)",
                 transform: `rotate(${pos.rotate}deg)`,
               }}
             >
@@ -95,36 +95,16 @@ export function LoadingQuips({ stopsGenerated }: LoadingQuipsProps) {
                 src={FLOATING_IMAGES[imgIdx]}
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full object-cover rounded-lg"
-                style={{ filter: "brightness(0.5) saturate(0.4) sepia(0.15)" }}
+                className="w-full h-full object-cover rounded-lg shadow-lg"
+                style={{ filter: "brightness(0.75) saturate(0.85)" }}
               />
               <div
                 className="absolute inset-0 rounded-lg"
-                style={{ border: "2px solid rgba(232,224,217,0.06)" }}
+                style={{ border: "2px solid rgba(232,224,217,0.15)" }}
               />
             </motion.div>
           );
         })}
-      </AnimatePresence>
-
-      {/* Mobile: single fading image behind content, more subtle */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`mobile-${visibleImages[0]}-${Math.floor(Date.now() / 2500)}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.08 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute inset-0 md:hidden pointer-events-none"
-        >
-          <img
-            src={FLOATING_IMAGES[visibleImages[0] || 0]}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover"
-            style={{ filter: "brightness(0.4) saturate(0.3) blur(2px)" }}
-          />
-        </motion.div>
       </AnimatePresence>
 
       {/* Content — centered on top of floating images */}
