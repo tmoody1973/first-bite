@@ -136,49 +136,109 @@ The response returns alternating text and image parts. A parser extracts the nar
 
 ---
 
-## Quick start
+## Quick start (spin-up instructions)
 
-### Prerequisites
+Get the app running locally in under 5 minutes.
 
-- Python 3.12+
-- Node.js 20+
-- Google Cloud SDK (`gcloud`)
-- A Google API key (Gemini API access)
-- A Google Maps API key (Places, Street View, Geocoding, Maps Static)
-- An ElevenLabs API key (sound generation)
+### Step 0: Clone the repo
 
-### Backend
+```bash
+git clone https://github.com/tmoody1973/first-bite.git
+cd first-bite
+```
+
+### Step 1: Get your API keys
+
+You need three keys before starting:
+
+| Key | Where to get it | What it's for |
+|-----|----------------|---------------|
+| **Google API Key** | [Google AI Studio](https://aistudio.google.com/apikey) | Gemini models (interleaved output, TTS, Veo) |
+| **Google Maps API Key** | [Google Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials) | Places, Street View, Geocoding, Maps Embed. Enable these APIs: Places API (New), Street View Static API, Geocoding API, Maps Embed API, Maps Static API |
+| **ElevenLabs API Key** | [ElevenLabs Dashboard](https://elevenlabs.io) | Ambient sound effects |
+
+### Step 2: Start the backend
 
 ```bash
 cd backend
+
+# Create virtual environment
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 
+# Create your .env file
 cp .env.example .env
-# Edit .env with your API keys
+```
 
+Now edit `backend/.env` with your keys:
+
+```
+GOOGLE_API_KEY=your_gemini_api_key_here
+GOOGLE_MAPS_API_KEY=your_maps_api_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_key_here
+GCP_PROJECT_ID=your_gcp_project_id
+GCS_BUCKET_NAME=first-bite-media
+```
+
+Start the server:
+
+```bash
 uvicorn main:app --port 8000 --reload
 ```
 
-### Frontend
+Verify it's running: open http://localhost:8000/health — you should see `{"status":"ok"}`
+
+### Step 3: Start the frontend
+
+Open a new terminal:
 
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
 
-# Create .env.local
-echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
-echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key" >> .env.local
-echo "CLERK_SECRET_KEY=your_key" >> .env.local
-echo "NEXT_PUBLIC_GOOGLE_MAPS_KEY=your_key" >> .env.local
+# Create your .env.local file
+cat > .env.local << 'EOF'
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_GOOGLE_MAPS_KEY=your_maps_api_key
+EOF
+```
 
+Start the dev server:
+
+```bash
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. Type a place name and hit "Bon Voyage."
 
-### Automated cloud deployment
+### Step 4 (optional): GCP setup for Cloud Storage and Firestore
+
+If you want images, audio, and video to persist (not just local dev):
+
+```bash
+# Authenticate
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+
+# Enable APIs
+gcloud services enable firestore.googleapis.com storage.googleapis.com
+
+# Create Firestore database
+gcloud firestore databases create --location=us-central1
+
+# Create Cloud Storage bucket
+gsutil mb -l us-central1 gs://first-bite-media
+gsutil iam ch allUsers:objectViewer gs://first-bite-media
+```
+
+### Automated cloud deployment (one command)
 
 ```bash
 # Set environment variables, then run:
