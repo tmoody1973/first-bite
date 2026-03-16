@@ -10,6 +10,14 @@ An AI-powered cultural food journey generator — inspired by food-focused trave
 **API:** https://first-bite-api-396860003792.us-central1.run.app
 **Code:** https://github.com/tmoody1973/first-bite
 
+### Google Cloud Deployment Proof
+
+- **Cloud Run Service:** [first-bite-api](https://console.cloud.google.com/run/detail/us-central1/first-bite-api/metrics?project=gen-lang-client-0506418938)
+- **Firestore Database:** [journeys collection](https://console.cloud.google.com/firestore/databases/-default-/data/panel/journeys?project=gen-lang-client-0506418938)
+- **Cloud Storage Bucket:** [first-bite-media](https://console.cloud.google.com/storage/browser/first-bite-media?project=gen-lang-client-0506418938)
+- **GCP Project:** `gen-lang-client-0506418938`
+- **Region:** `us-central1`
+
 ---
 
 ## How it works
