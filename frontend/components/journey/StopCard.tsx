@@ -19,9 +19,10 @@ const STOP_THEMES = [
 interface StopCardProps {
   stop: StopData;
   journeyId: string | null;
+  onNarrationEnd?: () => void;
 }
 
-export function StopCard({ stop, journeyId }: StopCardProps) {
+export function StopCard({ stop, journeyId, onNarrationEnd }: StopCardProps) {
   const theme = STOP_THEMES[stop.stopNumber - 1] || "";
   const [showRecipe, setShowRecipe] = useState(false);
   const [textRevealed, setTextRevealed] = useState(false);
@@ -170,6 +171,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
             narrative={stop.narrative}
             journeyId={journeyId}
             ttsAudioUrl={stop.ttsAudioUrl}
+            onEnded={onNarrationEnd}
           />
         </motion.div>
       </div>

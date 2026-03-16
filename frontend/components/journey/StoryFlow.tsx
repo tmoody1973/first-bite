@@ -22,34 +22,14 @@ export function StoryFlow({
   status = "complete",
 }: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const initialized = useRef(false);
-
-  // Simple: start at 0, auto-advance. No cinematic mode.
-  useEffect(() => {
-    if (stops.length === 0 || initialized.current) return;
-    initialized.current = true;
-    setCurrentIndex(0);
-
-    autoAdvanceRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const total = stops.length + (posterUrl ? 1 : 0);
-        if (prev < total - 1) return prev + 1;
-        if (autoAdvanceRef.current) {
-          clearInterval(autoAdvanceRef.current);
-          autoAdvanceRef.current = null;
-        }
-        return prev;
-      });
-    }, 45000);
-
-    return () => {
-      if (autoAdvanceRef.current) {
-        clearInterval(autoAdvanceRef.current);
-        autoAdvanceRef.current = null;
-      }
-    };
-  }, [stops.length, posterUrl]);
+  // Auto-advance when narration ends (not on a fixed timer)
+  const advanceToNext = () => {
+    setCurrentIndex((prev) => {
+      const total = stops.length + (posterUrl ? 1 : 0);
+      if (prev < total - 1) return prev + 1;
+      return prev;
+    });
+  };
 
   if (stops.length === 0) return null;
 
@@ -60,20 +40,11 @@ export function StoryFlow({
   const canGoBack = currentIndex > 0;
   const canGoForward = currentIndex < totalSlides - 1;
 
-  const stopAutoAdvance = () => {
-    if (autoAdvanceRef.current) {
-      clearInterval(autoAdvanceRef.current);
-      autoAdvanceRef.current = null;
-    }
-  };
-
   const goNext = () => {
-    stopAutoAdvance(); // User took control
     if (canGoForward) setCurrentIndex((i) => i + 1);
   };
 
   const goPrev = () => {
-    stopAutoAdvance(); // User took control
     if (canGoBack) setCurrentIndex((i) => i - 1);
   };
 
@@ -83,12 +54,10 @@ export function StoryFlow({
       if (e.key === "ArrowLeft") goPrev();
       // Jump to poster slide (for demo recording)
       if (e.key === "End" || e.key === "p") {
-        stopAutoAdvance();
         setCurrentIndex(totalSlides - 1);
       }
       // Jump to start
       if (e.key === "Home") {
-        stopAutoAdvance();
         setCurrentIndex(0);
       }
     };
@@ -228,7 +197,7 @@ export function StoryFlow({
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="h-full"
           >
-            <StopCard stop={currentStop} journeyId={journeyId} />
+            <StopCard stop={currentStop} journeyId={journeyId} onNarrationEnd={advanceToNext} />
           </motion.div>
         ) : null}
       </AnimatePresence>

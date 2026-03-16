@@ -8,6 +8,7 @@ interface AudioPlayerProps {
   journeyId: string | null;
   ttsAudioUrl: string | null;
   autoPlay?: boolean;
+  onEnded?: () => void;
 }
 
 export function AudioPlayer({
@@ -16,6 +17,7 @@ export function AudioPlayer({
   journeyId,
   ttsAudioUrl,
   autoPlay = true,
+  onEnded,
 }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -66,7 +68,7 @@ export function AudioPlayer({
       <audio
         ref={audioRef}
         src={ttsAudioUrl}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={() => { setIsPlaying(false); onEnded?.(); }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />
