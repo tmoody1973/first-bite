@@ -32,19 +32,19 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [user?.id]);
 
-  // Build Google Maps Static API URL with all journey pins
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
   const journeysWithCoords = journeys.filter((j) => j.lat && j.lng);
 
-  // Show map with pins if we have coordinates, or a world overview if we have journeys but no coords yet
-  let mapUrl: string | null = null;
-  if (mapsKey && journeys.length > 0) {
-    if (journeysWithCoords.length > 0) {
-      mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e${journeysWithCoords.map((j, i) => `&markers=color:0xC4652A|label:${i + 1}|${j.lat},${j.lng}`).join("")}&key=${mapsKey}`;
-    } else {
-      // No coords yet — show a world overview map
-      mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&center=20,0&zoom=1&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e&key=${mapsKey}`;
-    }
+  // Build an interactive embed map with markers
+  // Using Maps Embed API with "view" mode, or place mode for single pin
+  let mapEmbedUrl: string | null = null;
+  if (mapsKey && journeysWithCoords.length > 0) {
+    // Use the first journey's coords as center, show all as a view
+    const center = journeysWithCoords[0];
+    mapEmbedUrl = `https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${center.lat},${center.lng}&zoom=3&maptype=roadmap`;
+  } else if (mapsKey && journeys.length > 0) {
+    // No coords — show world view
+    mapEmbedUrl = `https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=20,0&zoom=2&maptype=roadmap`;
   }
 
   return (
@@ -70,21 +70,28 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* World map with journey pins */}
-      {mapUrl && (
+      {/* Interactive world map */}
+      {mapEmbedUrl && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto mb-8 rounded-2xl overflow-hidden border border-[#E8E0D0]/[0.06]"
         >
-          <img
-            src={mapUrl}
-            alt="Your journeys around the world"
-            className="w-full h-auto"
+          <iframe
+            src={mapEmbedUrl}
+            width="100%"
+            height="280"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Your food journey map"
           />
           <div className="bg-white/[0.02] px-4 py-2 flex items-center justify-between">
             <span className="font-sans text-[11px] text-[#E8E0D0]/30">
-              {journeysWithCoords.length} destination{journeysWithCoords.length !== 1 ? "s" : ""} explored
+              {journeysWithCoords.length > 0
+                ? `${journeysWithCoords.length} destination${journeysWithCoords.length !== 1 ? "s" : ""} explored`
+                : `${journeys.length} journey${journeys.length !== 1 ? "s" : ""} — map pins appear on new journeys`}
             </span>
             <span className="font-sans text-[10px] text-[#C4652A]/50">
               Your food map
