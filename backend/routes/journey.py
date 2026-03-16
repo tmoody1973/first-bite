@@ -22,6 +22,7 @@ from tools.tts import generate_tts
 from tools.image_gen import generate_dish_image
 from tools.places import search_place, get_street_view_url, get_street_view_url_from_address
 from tools.video_gen import generate_journey_video
+from tools.ambient import generate_ambient_sound
 
 router = APIRouter()
 
@@ -189,10 +190,14 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
             # Fallback: Street View from address string
             street_view_url = get_street_view_url_from_address(stop.place.address)
 
-    # NOTE: Veo video runs AFTER journey is marked ready (background enhancement)
-    # to avoid blocking the core experience
+    # Generate ambient sound effect (ElevenLabs — separate API, no Gemini rate limit)
+    ambient_url = ""
+    try:
+        ambient_url = generate_ambient_sound(location, stop_num)
+    except Exception as e:
+        logger.warning(f"Stop {stop_num}: Ambient sound failed: {e}")
 
-    # Generate TTS narration automatically
+    # Generate TTS narration automatically (Gemini TTS)
     tts_url = None
     if stop.narrative:
         try:
@@ -208,6 +213,7 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
         "scene_image_url": scene_url,
         "dish_image_url": dish_url,
         "video_url": "",
+        "ambient_url": ambient_url,
         "street_view_url": street_view_url,
         "real_photo_url": real_photo_url,
         "recipe": stop.recipe.model_dump() if stop.recipe else None,
@@ -357,18 +363,28 @@ async def get_journey_by_id(journey_id: str):
 async def list_user_journeys(user_id: str):
     """List all completed journeys for a user."""
     journeys = list_journeys_by_user(user_id)
-    # Return lightweight list (no full stops data)
-    return [
-        {
+    result = []
+    for j in journeys:
+        # Extract lat/lng from first stop's place for map pin
+        lat, lng = None, None
+        stops = j.get("stops", [])
+        for s in stops:
+            place = s.get("place")
+            if place and place.get("lat") and place.get("lng"):
+                lat = place["lat"]
+                lng = place["lng"]
+                break
+        result.append({
             "id": j["id"],
             "prompt": j.get("prompt", ""),
             "status": j.get("status", ""),
             "created_at": str(j.get("created_at", "")),
             "poster_url": j.get("poster_url", ""),
-            "stop_count": len(j.get("stops", [])),
-        }
-        for j in journeys
-    ]
+            "stop_count": len(stops),
+            "lat": lat,
+            "lng": lng,
+        })
+    return result
 
 
 @router.get("/api/journey/{journey_id}/share")

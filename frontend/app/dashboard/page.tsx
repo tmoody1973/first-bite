@@ -13,6 +13,8 @@ interface JourneySummary {
   created_at: string;
   poster_url: string;
   stop_count: number;
+  lat: number | null;
+  lng: number | null;
 }
 
 export default function DashboardPage() {
@@ -30,10 +32,18 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [user?.id]);
 
+  // Build Google Maps Static API URL with all journey pins
+  const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+  const journeysWithCoords = journeys.filter((j) => j.lat && j.lng);
+  const mapUrl =
+    mapsKey && journeysWithCoords.length > 0
+      ? `https://maps.googleapis.com/maps/api/staticmap?size=1200x300&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a2e&style=feature:all|element:labels.text.fill|color:0xE8E0D0&style=feature:all|element:labels.text.stroke|color:0x0A0A0A&style=feature:water|color:0x0d1b2a&style=feature:road|color:0x2a2a3e${journeysWithCoords.map((j, i) => `&markers=color:0xC4652A|label:${i + 1}|${j.lat},${j.lng}`).join("")}&key=${mapsKey}`
+      : null;
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-6 py-8">
       {/* Header */}
-      <div className="max-w-4xl mx-auto flex items-center justify-between mb-12">
+      <div className="max-w-4xl mx-auto flex items-center justify-between mb-8">
         <div>
           <h1 className="font-serif text-3xl font-bold">My Journeys</h1>
           <p className="font-sans text-sm text-[#E8E0D0]/40 mt-1">
@@ -52,6 +62,29 @@ export default function DashboardPage() {
           />
         </div>
       </div>
+
+      {/* World map with journey pins */}
+      {mapUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto mb-8 rounded-2xl overflow-hidden border border-[#E8E0D0]/[0.06]"
+        >
+          <img
+            src={mapUrl}
+            alt="Your journeys around the world"
+            className="w-full h-auto"
+          />
+          <div className="bg-white/[0.02] px-4 py-2 flex items-center justify-between">
+            <span className="font-sans text-[11px] text-[#E8E0D0]/30">
+              {journeysWithCoords.length} destination{journeysWithCoords.length !== 1 ? "s" : ""} explored
+            </span>
+            <span className="font-sans text-[10px] text-[#C4652A]/50">
+              Your food map
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Journey grid */}
       <div className="max-w-4xl mx-auto">
@@ -84,7 +117,6 @@ export default function DashboardPage() {
                 onClick={() => router.push(`/journey/${journey.id}`)}
                 className="group cursor-pointer rounded-2xl overflow-hidden border border-[#E8E0D0]/[0.06] bg-white/[0.02] hover:border-[#C4652A]/20 transition-colors"
               >
-                {/* Poster image or placeholder */}
                 <div className="h-48 relative overflow-hidden">
                   {journey.poster_url ? (
                     <img
@@ -101,8 +133,6 @@ export default function DashboardPage() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent" />
                 </div>
-
-                {/* Card content */}
                 <div className="p-4">
                   <h3 className="font-serif text-lg font-bold leading-tight mb-1 group-hover:text-[#C4652A] transition-colors">
                     {journey.prompt}

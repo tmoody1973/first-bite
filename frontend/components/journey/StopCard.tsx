@@ -41,6 +41,20 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
     }
   }, [stop.videoUrl]);
 
+  // Auto-play ambient sound at low volume (under narration)
+  const ambientRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    if (stop.ambientUrl && ambientRef.current) {
+      ambientRef.current.volume = 0.15; // Low volume — under narration
+      ambientRef.current.play().catch(() => {});
+    }
+    return () => {
+      if (ambientRef.current) {
+        ambientRef.current.pause();
+      }
+    };
+  }, [stop.ambientUrl, stop.stopNumber]);
+
   return (
     <div className="relative h-screen w-screen overflow-y-auto">
       {/* Background: video if available, else scene image */}
@@ -159,6 +173,11 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
           />
         </motion.div>
       </div>
+
+      {/* Ambient sound — plays at low volume under narration */}
+      {stop.ambientUrl && (
+        <audio ref={ambientRef} src={stop.ambientUrl} loop />
+      )}
 
       {/* Recipe modal */}
       {showRecipe && stop.recipe && (

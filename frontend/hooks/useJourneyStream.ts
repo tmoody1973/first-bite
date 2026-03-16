@@ -10,6 +10,7 @@ export interface StopData {
   sceneImageUrl: string;
   dishImageUrl: string;
   videoUrl: string;
+  ambientUrl: string;
   streetViewUrl: string;
   realPhotoUrl: string;
   recipe: {
@@ -43,6 +44,7 @@ function mapStop(s: Record<string, unknown>): StopData {
     sceneImageUrl: (s.scene_image_url as string) || "",
     dishImageUrl: (s.dish_image_url as string) || "",
     videoUrl: (s.video_url as string) || "",
+    ambientUrl: (s.ambient_url as string) || "",
     streetViewUrl: (s.street_view_url as string) || "",
     realPhotoUrl: (s.real_photo_url as string) || "",
     recipe: s.recipe as StopData["recipe"],

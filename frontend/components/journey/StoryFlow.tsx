@@ -151,31 +151,25 @@ export function StoryFlow({
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="h-full flex flex-col items-center justify-center px-6"
           >
-            {/* Journey video (if available) */}
-            {videoUrl && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mb-6 w-full max-w-lg"
-              >
+            {/* Travel poster with video background */}
+            <div className="relative max-w-lg w-full">
+              {/* Video background behind poster */}
+              {videoUrl && (
                 <video
                   src={videoUrl}
-                  controls
                   autoPlay
                   muted
                   loop
                   playsInline
-                  className="w-full rounded-2xl shadow-2xl"
+                  className="absolute inset-0 w-full h-full object-cover rounded-2xl opacity-30"
                 />
-              </motion.div>
-            )}
-
-            {/* Travel poster */}
-            <img
-              src={posterUrl!}
-              alt="Travel poster"
-              className="max-h-[50vh] max-w-full rounded-2xl shadow-2xl"
-            />
+              )}
+              <img
+                src={posterUrl!}
+                alt="Travel poster"
+                className="relative z-10 max-h-[60vh] w-full object-contain rounded-2xl shadow-2xl"
+              />
+            </div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
