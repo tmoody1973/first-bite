@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { RecipeCard } from "./RecipeCard";
 import { PlaceCard } from "./PlaceCard";
@@ -23,24 +23,48 @@ interface StopCardProps {
 export function StopCard({ stop, journeyId }: StopCardProps) {
   const theme = STOP_THEMES[stop.stopNumber - 1] || "";
   const [showRecipe, setShowRecipe] = useState(false);
+  const [textRevealed, setTextRevealed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Typewriter reveal effect
+  useEffect(() => {
+    setTextRevealed(false);
+    const timer = setTimeout(() => setTextRevealed(true), 300);
+    return () => clearTimeout(timer);
+  }, [stop.stopNumber]);
+
+  // Auto-play video if present
+  useEffect(() => {
+    if (stop.videoUrl && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [stop.videoUrl]);
 
   return (
     <div className="relative h-screen w-screen overflow-y-auto">
-      {/* Background scene image */}
-      {stop.sceneImageUrl && (
+      {/* Background: video if available, else scene image */}
+      {stop.videoUrl ? (
+        <div className="absolute inset-0">
+          <video
+            ref={videoRef}
+            src={stop.videoUrl}
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-[#0A0A0A]/20" />
+        </div>
+      ) : stop.sceneImageUrl ? (
         <div className="absolute inset-0">
           <img
             src={stop.sceneImageUrl}
             alt={`Scene at ${stop.title}`}
             className="w-full h-full object-cover"
           />
-          {/* Dark gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-[#0A0A0A]/30" />
         </div>
-      )}
-
-      {/* No image fallback — solid dark background */}
-      {!stop.sceneImageUrl && (
+      ) : (
         <div className="absolute inset-0 bg-[#0A0A0A]" />
       )}
 
@@ -67,24 +91,59 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
           {stop.title}
         </motion.h2>
 
-        {/* Narrative */}
+        {/* Narrative with typewriter reveal */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="font-sans text-sm md:text-base leading-relaxed text-[#E8E0D0]/80 mb-6 max-h-[35vh] overflow-y-auto pr-2 whitespace-pre-line scrollbar-thin"
+          animate={{ opacity: textRevealed ? 1 : 0.3, y: textRevealed ? 0 : 10 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="font-sans text-sm md:text-base leading-relaxed text-[#E8E0D0]/80 mb-6 max-h-[30vh] overflow-y-auto pr-2 whitespace-pre-line"
         >
           {stop.narrative}
         </motion.div>
 
-        {/* Action row: dish image, recipe, place, audio */}
+        {/* Media row: Street View + real photo thumbnails */}
+        {(stop.streetViewUrl || stop.realPhotoUrl) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex gap-2 mb-4"
+          >
+            {stop.streetViewUrl && (
+              <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-white/10">
+                <img
+                  src={stop.streetViewUrl}
+                  alt="Street View"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute bottom-0.5 left-1 font-mono text-[8px] text-white/60 bg-black/50 px-1 rounded">
+                  SV
+                </span>
+              </div>
+            )}
+            {stop.realPhotoUrl && (
+              <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-white/10">
+                <img
+                  src={stop.realPhotoUrl}
+                  alt="Real photo"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute bottom-0.5 left-1 font-mono text-[8px] text-white/60 bg-black/50 px-1 rounded">
+                  Photo
+                </span>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Action row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="space-y-4"
         >
-          {/* Dish image thumbnail + recipe toggle */}
+          {/* Dish image + recipe toggle */}
           {(stop.dishImageUrl || stop.recipe) && (
             <div className="flex items-center gap-4">
               {stop.dishImageUrl && (
@@ -106,7 +165,8 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
                 )}
                 {stop.recipe && (
                   <p className="font-sans text-xs text-[#E8E0D0]/40">
-                    {stop.recipe.cuisine_type} &middot; {stop.recipe.prep_time} min &middot; Tap for recipe
+                    {stop.recipe.cuisine_type} &middot; {stop.recipe.prep_time}{" "}
+                    min &middot; Tap for recipe
                   </p>
                 )}
               </div>
@@ -126,7 +186,7 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
         </motion.div>
       </div>
 
-      {/* Recipe modal (slides up from bottom) */}
+      {/* Recipe modal */}
       {showRecipe && stop.recipe && (
         <motion.div
           initial={{ y: "100%" }}
@@ -141,12 +201,14 @@ export function StopCard({ stop, journeyId }: StopCardProps) {
             className="relative w-full max-h-[85vh] overflow-y-auto rounded-t-3xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drag handle */}
             <div className="sticky top-0 bg-[#0A0A0A] pt-3 pb-2 flex justify-center rounded-t-3xl z-10">
               <div className="w-10 h-1 rounded-full bg-white/20" />
             </div>
             <div className="px-4 pb-8 bg-[#0A0A0A]">
-              <RecipeCard recipe={stop.recipe} dishImageUrl={stop.dishImageUrl} />
+              <RecipeCard
+                recipe={stop.recipe}
+                dishImageUrl={stop.dishImageUrl}
+              />
             </div>
           </div>
         </motion.div>

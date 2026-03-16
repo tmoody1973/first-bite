@@ -20,6 +20,15 @@ def upload_image_from_base64(data: str, prefix: str = "images") -> str:
     return f"https://storage.googleapis.com/{GCS_BUCKET_NAME}/{filename}"
 
 
+def upload_video(video_bytes: bytes, prefix: str = "videos") -> str:
+    """Upload video bytes to GCS, return public URL."""
+    bucket = _get_bucket()
+    filename = f"{prefix}/{uuid.uuid4()}.mp4"
+    blob = bucket.blob(filename)
+    blob.upload_from_string(video_bytes, content_type="video/mp4")
+    return f"https://storage.googleapis.com/{GCS_BUCKET_NAME}/{filename}"
+
+
 def upload_audio(audio_bytes: bytes, prefix: str = "audio") -> str:
     """Upload audio bytes to GCS, return public URL."""
     bucket = _get_bucket()

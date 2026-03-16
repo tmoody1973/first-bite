@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StopCard } from "./StopCard";
 import { ProgressDots } from "./ProgressDots";
@@ -10,15 +10,29 @@ interface StoryFlowProps {
   stops: StopData[];
   journeyId: string | null;
   posterUrl?: string | null;
+  isGenerating?: boolean;
 }
 
-export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
+export function StoryFlow({
+  stops,
+  journeyId,
+  posterUrl,
+  isGenerating = false,
+}: StoryFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Auto-advance to latest stop as they arrive during generation
+  useEffect(() => {
+    if (isGenerating && stops.length > 0) {
+      setCurrentIndex(stops.length - 1);
+    }
+  }, [stops.length, isGenerating]);
 
   if (stops.length === 0) return null;
 
-  const totalSlides = stops.length + (posterUrl ? 1 : 0);
-  const isPosterSlide = posterUrl && currentIndex === stops.length;
+  const showPoster = !isGenerating && posterUrl;
+  const totalSlides = stops.length + (showPoster ? 1 : 0);
+  const isPosterSlide = showPoster && currentIndex === stops.length;
   const currentStop = isPosterSlide ? null : stops[currentIndex];
   const canGoBack = currentIndex > 0;
   const canGoForward = currentIndex < totalSlides - 1;
@@ -31,7 +45,6 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
     if (canGoBack) setCurrentIndex((i) => i - 1);
   };
 
-  // Keyboard navigation
   if (typeof window !== "undefined") {
     window.onkeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
@@ -44,7 +57,10 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
       {/* Progress bar at top */}
       <div className="fixed top-0 left-0 right-0 z-50 flex gap-1 px-3 pt-3">
         {Array.from({ length: totalSlides }, (_, i) => (
-          <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/10">
+          <div
+            key={i}
+            className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/10"
+          >
             <motion.div
               className="h-full bg-[#C4652A]"
               initial={{ width: "0%" }}
@@ -55,13 +71,26 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
         ))}
       </div>
 
+      {/* Generating indicator */}
+      {isGenerating && (
+        <div className="fixed top-5 left-4 z-50 flex items-center gap-2">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            className="w-3 h-3 border border-[#C4652A]/40 border-t-[#C4652A] rounded-full"
+          />
+          <span className="font-sans text-[10px] text-[#E8E0D0]/30 uppercase tracking-wider">
+            Creating stop {stops.length + 1} of 5...
+          </span>
+        </div>
+      )}
+
       {/* Stop counter */}
       <ProgressDots current={currentIndex + 1} total={totalSlides} />
 
       {/* Full-screen content */}
       <AnimatePresence mode="wait">
         {isPosterSlide ? (
-          /* Travel poster — final slide */
           <motion.div
             key="poster"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -71,7 +100,7 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
             className="h-full flex flex-col items-center justify-center px-6"
           >
             <img
-              src={posterUrl}
+              src={posterUrl!}
               alt="Travel poster"
               className="max-h-[70vh] max-w-full rounded-2xl shadow-2xl"
             />
@@ -137,7 +166,6 @@ export function StoryFlow({ stops, journeyId, posterUrl }: StoryFlowProps) {
         onClick={goNext}
       />
 
-      {/* Navigation arrows (desktop) */}
       {canGoBack && (
         <button
           onClick={goPrev}

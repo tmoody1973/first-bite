@@ -10,14 +10,27 @@ interface PlaceCardProps {
 export function PlaceCard({ place }: PlaceCardProps) {
   const [showMap, setShowMap] = useState(false);
 
-  const mapsEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}&q=${encodeURIComponent(place.address)}&maptype=roadmap`;
+  const mapsQuery = place.lat && place.lng
+    ? `${place.lat},${place.lng}`
+    : encodeURIComponent(place.address);
+
+  const mapsEmbedUrl = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
+    ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&q=${mapsQuery}&maptype=roadmap`
+    : null;
 
   return (
     <>
       <div className="flex items-center gap-3 py-3">
         <div className="text-[#C4652A] text-lg">&#x1F4CD;</div>
         <div className="flex-1">
-          <p className="font-sans text-sm font-medium">{place.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-sans text-sm font-medium">{place.name}</p>
+            {place.rating && (
+              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#C4652A]/15 text-[#C4652A]">
+                {place.rating.toFixed(1)}
+              </span>
+            )}
+          </div>
           <p className="font-sans text-xs text-[#E8E0D0]/40">
             {place.address}
           </p>
@@ -44,7 +57,16 @@ export function PlaceCard({ place }: PlaceCardProps) {
           >
             <div className="flex items-center justify-between p-4 border-b border-[#E8E0D0]/10">
               <div>
-                <h3 className="font-sans text-sm font-medium">{place.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-sans text-sm font-medium">
+                    {place.name}
+                  </h3>
+                  {place.rating && (
+                    <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#C4652A]/15 text-[#C4652A]">
+                      {place.rating.toFixed(1)}
+                    </span>
+                  )}
+                </div>
                 <p className="font-sans text-xs text-[#E8E0D0]/40">
                   {place.address}
                 </p>
@@ -56,7 +78,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
                 &times;
               </button>
             </div>
-            {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ? (
+            {mapsEmbedUrl ? (
               <iframe
                 src={mapsEmbedUrl}
                 width="100%"
@@ -69,7 +91,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
             ) : (
               <div className="h-[400px] flex items-center justify-center">
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(place.address)}`}
+                  href={`https://maps.google.com/?q=${mapsQuery}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#C4652A] hover:underline font-sans text-sm"
@@ -79,7 +101,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
               </div>
             )}
             <p className="p-3 font-sans text-[10px] text-[#E8E0D0]/20 text-center">
-              Place is AI-suggested. Verify details before visiting.
+              Place is AI-suggested and verified via Google Search grounding.
             </p>
           </div>
         </div>

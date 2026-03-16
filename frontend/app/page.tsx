@@ -9,21 +9,28 @@ import { useJourneyStream } from "@/hooks/useJourneyStream";
 
 export default function Home() {
   const { user, isSignedIn } = useUser();
-  const { stops, status, stopsGenerated, journeyId, error, posterUrl, startJourney } =
+  const { stops, status, journeyId, error, posterUrl, startJourney } =
     useJourneyStream();
 
   const handleSubmit = (prompt: string) => {
     startJourney(prompt, user?.id);
   };
 
-  // Show loading screen until ALL stops are ready
+  // Initial loading — show first quip before any stops arrive
   if (status === "loading") {
-    return <LoadingQuips stopsGenerated={stopsGenerated} />;
+    return <LoadingQuips stopsGenerated={0} />;
   }
 
-  // Only show the experience when EVERYTHING is complete
-  if (status === "complete" && stops.length > 0) {
-    return <StoryFlow stops={stops} journeyId={journeyId} posterUrl={posterUrl} />;
+  // Cinematic mode — progressive reveal as stops arrive
+  if (status === "cinematic" || status === "complete") {
+    return (
+      <StoryFlow
+        stops={stops}
+        journeyId={journeyId}
+        posterUrl={posterUrl}
+        isGenerating={status === "cinematic"}
+      />
+    );
   }
 
   return (
@@ -39,9 +46,7 @@ export default function Home() {
               My Journeys
             </a>
             <UserButton
-              appearance={{
-                elements: { avatarBox: "w-8 h-8" },
-              }}
+              appearance={{ elements: { avatarBox: "w-8 h-8" } }}
             />
           </>
         ) : (

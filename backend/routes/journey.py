@@ -20,6 +20,8 @@ from services.firestore import (
 )
 from tools.tts import generate_tts
 from tools.image_gen import generate_dish_image
+from tools.places import search_place, get_street_view_url, get_street_view_url_from_address
+from tools.video_gen import generate_stop_video
 
 router = APIRouter()
 
@@ -89,7 +91,11 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
     response = client.models.generate_content(
         model=STORYTELLER_MODEL,
         contents=[{"role": "user", "parts": [{"text": prompt}]}],
-        config={"response_modalities": ["TEXT", "IMAGE"]},
+        config={
+            "response_modalities": ["TEXT", "IMAGE"],
+            # Enable grounding with Google Search to verify restaurants/recipes
+            "tools": [{"google_search": {}}],
+        },
     )
 
     # Extract parts
@@ -149,12 +155,45 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
     if stop.dish_image_data:
         dish_url = upload_image_from_base64(stop.dish_image_data, prefix="dishes")
 
-    # Generate TTS narration automatically (like Sonic Sommelier)
+    # Enrich with Google Places API — verify restaurant, get real data
+    place_data = None
+    street_view_url = ""
+    real_photo_url = ""
+    if stop.place:
+        place_data = stop.place.model_dump()
+        place_info = search_place(stop.place.name, stop.place.address)
+        if place_info:
+            place_data["name"] = place_info.get("name", place_data["name"])
+            place_data["address"] = place_info.get("address", place_data["address"])
+            place_data["rating"] = place_info.get("rating")
+            place_data["lat"] = place_info.get("lat")
+            place_data["lng"] = place_info.get("lng")
+            real_photo_url = place_info.get("photo_url", "")
+
+            # Get Street View if we have coordinates
+            if place_info.get("lat") and place_info.get("lng"):
+                street_view_url = get_street_view_url(
+                    place_info["lat"], place_info["lng"]
+                )
+            logger.info(f"Stop {stop_num}: Places verified — {place_data['name']} (rating: {place_data.get('rating')})")
+        else:
+            # Fallback: Street View from address string
+            street_view_url = get_street_view_url_from_address(stop.place.address)
+
+    # Generate Veo video clip (ambient B-roll)
+    video_url = ""
+    try:
+        video_url = generate_stop_video(
+            location, stop.title, theme_desc
+        )
+    except Exception as e:
+        logger.warning(f"Stop {stop_num}: Veo failed: {e}")
+
+    # Generate TTS narration automatically
     tts_url = None
     if stop.narrative:
         try:
-            tts_text = stop.narrative
-            tts_url = generate_tts(tts_text, voice="Charon")
+            tts_url = generate_tts(stop.narrative, voice="Charon")
             logger.info(f"Stop {stop_num}: TTS generated")
         except Exception as e:
             logger.warning(f"Stop {stop_num}: TTS failed: {e}")
@@ -165,8 +204,11 @@ def generate_single_stop(client, location: str, stop_num: int) -> dict:
         "narrative": stop.narrative,
         "scene_image_url": scene_url,
         "dish_image_url": dish_url,
+        "video_url": video_url,
+        "street_view_url": street_view_url,
+        "real_photo_url": real_photo_url,
         "recipe": stop.recipe.model_dump() if stop.recipe else None,
-        "place": stop.place.model_dump() if stop.place else None,
+        "place": place_data,
         "tts_audio_url": tts_url,
     }
 

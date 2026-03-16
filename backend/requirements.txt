@@ -10,3 +10,4 @@ sse-starlette
 python-dotenv
 pytest
 httpx
+requests

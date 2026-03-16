@@ -9,6 +9,9 @@ export interface StopData {
   narrative: string;
   sceneImageUrl: string;
   dishImageUrl: string;
+  videoUrl: string;
+  streetViewUrl: string;
+  realPhotoUrl: string;
   recipe: {
     dish_name: string;
     cuisine_type: string;
@@ -21,21 +24,38 @@ export interface StopData {
     name: string;
     address: string;
     footnote: string;
+    rating: number | null;
+    lat: number | null;
+    lng: number | null;
   } | null;
   ttsAudioUrl: string | null;
 }
 
-type StreamStatus = "idle" | "loading" | "complete" | "error";
+// "cinematic" = progressive reveal as stops arrive
+type StreamStatus = "idle" | "loading" | "cinematic" | "complete" | "error";
 
 function mapStop(s: Record<string, unknown>): StopData {
+  const place = s.place as Record<string, unknown> | null;
   return {
     stopNumber: (s.stop_number as number) || 0,
     title: (s.title as string) || "",
     narrative: (s.narrative as string) || "",
     sceneImageUrl: (s.scene_image_url as string) || "",
     dishImageUrl: (s.dish_image_url as string) || "",
+    videoUrl: (s.video_url as string) || "",
+    streetViewUrl: (s.street_view_url as string) || "",
+    realPhotoUrl: (s.real_photo_url as string) || "",
     recipe: s.recipe as StopData["recipe"],
-    place: s.place as StopData["place"],
+    place: place
+      ? {
+          name: (place.name as string) || "",
+          address: (place.address as string) || "",
+          footnote: (place.footnote as string) || "",
+          rating: (place.rating as number) || null,
+          lat: (place.lat as number) || null,
+          lng: (place.lng as number) || null,
+        }
+      : null,
     ttsAudioUrl: (s.tts_audio_url as string) || null,
   };
 }
@@ -43,13 +63,12 @@ function mapStop(s: Record<string, unknown>): StopData {
 export function useJourneyStream() {
   const [stops, setStops] = useState<StopData[]>([]);
   const [status, setStatus] = useState<StreamStatus>("idle");
-  const [stopsGenerated, setStopsGenerated] = useState(0);
   const [journeyId, setJourneyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevStopCountRef = useRef(0);
 
-  // Clean up polling on unmount
   useEffect(() => {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
@@ -61,10 +80,10 @@ export function useJourneyStream() {
     setStatus("loading");
     setError(null);
     setJourneyId(null);
-    setStopsGenerated(0);
+    setPosterUrl(null);
+    prevStopCountRef.current = 0;
 
     try {
-      // Create the journey — backend generates in background
       const res = await fetch(`${API_URL}/api/journey`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -80,7 +99,7 @@ export function useJourneyStream() {
       const { journeyId: jid } = await res.json();
       setJourneyId(jid);
 
-      // Poll until ALL stops are ready (like Sonic Sommelier waiting for full pipeline)
+      // Poll — switch to "cinematic" as soon as first stop arrives
       pollingRef.current = setInterval(async () => {
         try {
           const pollRes = await fetch(`${API_URL}/api/journey/${jid}`);
@@ -89,10 +108,12 @@ export function useJourneyStream() {
           const journey = await pollRes.json();
           const journeyStops = (journey.stops || []) as Record<string, unknown>[];
 
-          // Update progress counter (for loading screen)
-          setStopsGenerated(journeyStops.length);
+          // As soon as first stop arrives, switch to cinematic mode
+          if (journeyStops.length > 0) {
+            setStatus("cinematic");
+            setStops(journeyStops.map(mapStop));
+          }
 
-          // Only reveal when EVERYTHING is done
           if (journey.status === "ready") {
             if (pollingRef.current) clearInterval(pollingRef.current);
             pollingRef.current = null;
@@ -106,7 +127,7 @@ export function useJourneyStream() {
             setError("The kitchen's closed. Try another destination.");
           }
         } catch {
-          // Ignore individual poll failures
+          // Ignore poll failures
         }
       }, 3000);
     } catch {
@@ -115,5 +136,5 @@ export function useJourneyStream() {
     }
   }, []);
 
-  return { stops, status, stopsGenerated, journeyId, error, posterUrl, startJourney };
+  return { stops, status, journeyId, error, posterUrl, startJourney };
 }
