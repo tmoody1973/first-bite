@@ -51,11 +51,20 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0A0A0A] px-6 py-8">
       {/* Header */}
       <div className="max-w-4xl mx-auto flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-serif text-3xl font-bold">My Journeys</h1>
-          <p className="font-sans text-sm text-[#E8E0D0]/40 mt-1">
-            Every place tells a story through its food.
-          </p>
+        <div className="flex items-center gap-5">
+          <a href="/" className="shrink-0">
+            <img
+              src="/logo.png"
+              alt="First Bite"
+              className="h-10 w-auto"
+            />
+          </a>
+          <div>
+            <h1 className="font-serif text-2xl font-bold leading-tight">My Journeys</h1>
+            <p className="font-sans text-xs text-[#E8E0D0]/40">
+              Every place tells a story through its food.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <button
