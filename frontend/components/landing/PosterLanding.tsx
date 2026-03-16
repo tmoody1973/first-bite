@@ -69,9 +69,9 @@ export function PosterLanding({ onSubmit, isLoading }: PosterLandingProps) {
           alt=""
           aria-hidden="true"
           className="w-full h-full object-cover"
-          style={{ filter: "brightness(0.15) saturate(0.4) sepia(0.3)" }}
+          style={{ filter: "brightness(0.45) saturate(0.7)" }}
         />
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.92) 70%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.75) 85%)" }} />
       </div>
 
       {/* Auth bar */}
